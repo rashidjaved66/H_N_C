@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <meta name="theme-color" content="#1f6feb">
-<link rel="manifest" href="manifest.webmanifest">
+<link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -306,8 +306,10 @@ const DEFAULT_USERS = {
 
 const USERS_KEY = "orderBookerUsers_v3";
 function loadUsers(){
-  try{return JSON.parse(localStorage.getItem(USERS_KEY)||"null") || {...DEFAULT_USERS};}
-  catch(e){return {...DEFAULT_USERS};}
+  try{
+    const saved=JSON.parse(localStorage.getItem(USERS_KEY)||"null");
+    return {...DEFAULT_USERS,...(saved||{})};
+  }catch(e){return {...DEFAULT_USERS};}
 }
 function saveUsers(users){
   localStorage.setItem(USERS_KEY, JSON.stringify(users));
@@ -323,9 +325,14 @@ let productCatalog={};
 function userKey(){ return "orderBookerPro_"+currentUser; }
 
 function loadUserData(){
-  orders=JSON.parse(localStorage.getItem(userKey())||"[]");
-  try{productCatalog=JSON.parse(localStorage.getItem(userKey()+"_products")||"{}")||{};}
-  catch(e){productCatalog={};}
+  try{orders=JSON.parse(localStorage.getItem(userKey())||"[]")||[];}catch(e){orders=[];}
+  try{productCatalog=JSON.parse(localStorage.getItem(userKey()+"_products")||"{}")||{};}catch(e){productCatalog={};}
+  products=Object.entries(productCatalog).map(([name,v])=>({
+    id:v?.id||name,
+    name,
+    category:String(v?.category||""),
+    rate:Number(v?.rate)||0
+  }));
 }
 function saveUserData(){
   localStorage.setItem(userKey(),JSON.stringify(orders));
@@ -398,7 +405,8 @@ function logout(){
 function openApp(){
   document.getElementById("loginScreen").classList.add("hidden");
   document.getElementById("app").classList.remove("hidden");
-  document.getElementById("loggedUser").textContent=getUsers()[currentUser].name+" ("+currentUser+")";
+  const user=getUsers()[currentUser] || DEFAULT_USERS.admin;
+  document.getElementById("loggedUser").textContent=(user.name||currentUser)+" ("+currentUser+")";
   loadUserData();
   items=[];
   renderItems();
@@ -406,6 +414,7 @@ function openApp(){
   renderPendingOrders();
   updateSummary();
   renderCustomerList();
+  renderCategorySelect();
   renderProductList();
   updateNewProductTotal();
 }
@@ -433,8 +442,7 @@ function renderProductList(){
   const list=document.getElementById("orderProductList");
   if(!list)return;
   const cat=(document.getElementById("orderCategoryInput")?.value||"").trim().toLowerCase();
-  const filtered=products
-    .filter(p=>!cat || String(p.category||"").toLowerCase()===cat)
+  const filtered=products.filter(p=>!cat || String(p.category||"").toLowerCase()===cat)
     .sort((a,b)=>String(a.name).localeCompare(String(b.name)));
   list.innerHTML=filtered.map(p=>`<option value="${esc(p.name)}"></option>`).join("");
 }
@@ -444,135 +452,27 @@ function renderCategorySelect(){
   const cats=[...new Set(products.map(p=>String(p.category||"").trim()).filter(Boolean))].sort();
   list.innerHTML=cats.map(c=>`<option value="${esc(c)}"></option>`).join("");
 }
-function renderCategoryList(){
-  const list=document.getElementById("categoryList");
-  if(!list)return;
-  const cats=[...new Set(products.map(p=>String(p.category||"").trim()).filter(Boolean))].sort();
-  list.innerHTML=cats.map(c=>`<option value="${esc(c)}"></option>`).join("");
+function categoryChanged(){
+  renderProductList();
+  const product=document.getElementById("orderProductInput");
+  if(product) product.value="";
+  const rate=document.getElementById("newRate");
+  if(rate) rate.value="";
+  const total=document.getElementById("newTotal");
+  if(total) total.value="Rs. 0.00";
 }
 function orderProductChanged(){
   const input=document.getElementById("orderProductInput");
   const name=(input?.value||"").trim().toLowerCase();
   const cat=(document.getElementById("orderCategoryInput")?.value||"").trim().toLowerCase();
-  const p=products.find(x=>
-    String(x.name).toLowerCase()===name &&
-    (!cat || String(x.category||"").toLowerCase()===cat)
-  );
-  if(p){
-    document.getElementById("newRate").value=p.rate;
-    updateNewProductTotal();
-  }
-}
-function renderCategorySelect(){
-  const select=document.getElementById("orderCategory");
-  if(!select)return;
-  const cats=[...new Set(products.map(p=>String(p.category||"").trim()).filter(Boolean))].sort();
-  select.innerHTML='<option value="">Select Category</option>'+cats.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join("");
-}
-
-function renderCategoryList(){
-  const list=document.getElementById("categoryList");
-  if(!list)return;
-  const cats=[...new Set(products.map(p=>String(p.category||"").trim()).filter(Boolean))].sort();
-  list.innerHTML=cats.map(c=>`<option value="${esc(c)}"></option>`).join("");
-}
-
-function categoryChanged(){
-  renderProductList();
-  const input=document.getElementById("orderProductInput");
-  if(input)input.value="";
-  document.getElementById("newRate").value="";
-  document.getElementById("newTotal").value="Rs. 0.00";
-}
-function orderProductChanged(){
-  const name=document.getElementById("orderProduct").value.trim().toLowerCase();
-  const p=products.find(x=>String(x.name).toLowerCase()===name);
+  const p=products.find(x=>String(x.name||"").toLowerCase()===name &&
+    (!cat || String(x.category||"").toLowerCase()===cat));
   if(p){
     document.getElementById("newRate").value=p.rate;
     updateNewProductTotal();
   }
 }
 
-
-function customerSelected(){
-  const q=document.getElementById("customerSearch").value.trim().toLowerCase();
-  const c=getCustomers().find(x=>x.mobile.toLowerCase()===q || x.name.toLowerCase()===q);
-  if(c){
-    document.getElementById("customer").value=c.name;
-    document.getElementById("mobile").value=c.mobile;
-    const latest=orders.filter(o=>(o.mobile||"")===c.mobile).sort((a,b)=>b.id-a.id)[0];
-    document.getElementById("address").value=latest?.address||"";
-    document.getElementById("customerHistory").textContent=
-      "Previous orders: "+c.orders+" • Previous sales: Rs. "+money(c.sales);
-  }
-}
-function newCustomer(){
-  document.getElementById("customerSearch").value="";
-  document.getElementById("customer").value="";
-  document.getElementById("mobile").value="";
-  document.getElementById("address").value="";
-  document.getElementById("customerHistory").textContent="New customer";
-  document.getElementById("customer").focus();
-}
-
-
-
-function togglePanel(id, btn){
-  const panel=document.getElementById(id);
-  if(!panel)return;
-  const hidden=panel.classList.toggle("hidden");
-  const span=btn.querySelector("span");
-  if(span)span.textContent=hidden?"＋":"−";
-  if(!hidden && id==="addItemPanel"){
-    setTimeout(()=>document.getElementById("registerProduct").focus(),120);
-  }
-}
-
-function updateNewProductTotal(){
-  const q=Number(document.getElementById("newQty").value)||0;
-  const r=Number(document.getElementById("newRate").value)||0;
-  document.getElementById("newTotal").value="Rs. "+money(q*r);
-}
-
-function addProductFromBox(){
-  const category=document.getElementById("orderCategoryInput").value.trim();
-  const product=document.getElementById("orderProductInput").value.trim();
-  const qty=Number(document.getElementById("newQty").value);
-  const rate=Number(document.getElementById("newRate").value);
-
-  if(!category){alert("Category enter/select karein.");return}
-  if(!product){alert("Product name enter/select karein.");return}
-  if(qty<=0 || !Number.isFinite(qty)){alert("Qty sahi enter karein.");return}
-  if(rate<0 || !Number.isFinite(rate)){alert("Rate sahi enter karein.");return}
-
-  const existing=products.find(x=>
-    String(x.name).toLowerCase()===product.toLowerCase() &&
-    String(x.category||"").toLowerCase()===category.toLowerCase()
-  );
-  if(existing){
-    existing.rate=rate;
-  }else{
-    products.push({id:Date.now()+Math.random(),name:product,category,rate});
-  }
-  saveUserData();
-
-  items.push({id:Date.now()+Math.random(),product,category,qty,rate});
-  renderItems();
-
-  document.getElementById("orderProductInput").value="";
-  document.getElementById("newQty").value=1;
-  document.getElementById("newRate").value="";
-  document.getElementById("newTotal").value="Rs. 0.00";
-
-  renderCategorySelect();
-  document.getElementById("orderCategoryInput").value=category;
-  renderProductList();
-  setTimeout(()=>document.getElementById("orderProductInput").focus(),80);
-}
-function addItem(product="",qty=1,rate=""){
-  items.push({id:Date.now()+Math.random(),product,qty,rate});
-  renderItems();
-}
 function renderItems(){
   document.getElementById("items").innerHTML=items.map((x,i)=>`
   <div class="item">
@@ -662,6 +562,7 @@ function saveOrder(){
   renderOrders();
   updateSummary();
   renderCustomerList();
+  renderCategorySelect();
   renderProductList();
   updateNewProductTotal();
 
@@ -972,39 +873,7 @@ function printTodayCategoryPDF(){
     html+=`<tr><td class="total">Category Total</td><td>${catQty}</td><td>Rs. ${money(catAmount)}</td></tr></table>`;
   });
   html+=`<div class="grand">Grand Total — Qty: ${grandQty} &nbsp;&nbsp; Amount: Rs. ${money(grandAmount)}</div>
-  <script>window.onload=()=>window.print()<\/script>
-<script>
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(()=>{}));
-}
-let deferredInstallPrompt = null;
-window.addEventListener("beforeinstallprompt", e => {
-  e.preventDefault();
-  deferredInstallPrompt = e;
-  const btn = document.getElementById("installAppBtn");
-  if (btn) btn.style.display = "inline-flex";
-});
-async function installApp() {
-  if (!deferredInstallPrompt) {
-    alert("Install option browser ke menu (⋮) mein 'Install app' / 'Add to Home screen' se bhi mil sakta hai.");
-    return;
-  }
-  deferredInstallPrompt.prompt();
-  await deferredInstallPrompt.userChoice;
-  deferredInstallPrompt = null;
-  const btn = document.getElementById("installAppBtn");
-  if (btn) btn.style.display = "none";
-}
-window.addEventListener("appinstalled", () => {
-  const btn = document.getElementById("installAppBtn");
-  if (btn) btn.style.display = "none";
-});
-</script>
-
-
-<button id="installAppBtn" onclick="installApp()" style="display:none;position:fixed;right:16px;bottom:16px;z-index:9999;border:0;border-radius:14px;padding:12px 16px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px #0003;">📲 Install App</button>
-
-</body></html>`;
+  <script>window.onload=()=>window.print()<\/script></body></html>`;
   const w=window.open("","_blank");
   if(w){w.document.write(html);w.document.close();}
 }

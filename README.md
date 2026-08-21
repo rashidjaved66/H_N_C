@@ -1,19 +1,14 @@
 # Habib Naveed Confectionery
+GitHub Pages / PWA package.
 
-Offline order management PWA.
+Upload all files to the repository root:
+- index.html
+- manifest.json
+- sw.js
+- README.md
 
-## GitHub Pages Install Button
+Default login:
+Username: admin
+Password: 1234
 
-Upload these files to a GitHub repository:
-
-- `index.html`
-- `manifest.json`
-- `sw.js`
-
-Then enable **GitHub Pages** from the repository settings.
-
-Open the GitHub Pages URL in Chrome/Edge. The **📲 Install App** button will appear when the browser allows PWA installation.
-
-## Important
-
-The app currently stores its data locally/offline in the browser. GitHub Pages only hosts the app; it does not automatically make the order data online or shared between devices.
+The app is offline/local-storage based. GitHub Pages hosts the app but does not sync data between devices.

@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="theme-color" content="#1f6feb">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Habib Naveed Confectionery CSP - Order Booker v5 WhatsApp</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#eef3f8;font-family:Calibri,"Segoe UI",Arial,sans-serif;color:#222;-webkit-tap-highlight-color:transparent}
+button,input,select{touch-action:manipulation}
+.container{max-width:700px;margin:auto;padding:10px}
+.card{background:#fff;border-radius:18px;padding:14px;margin-bottom:12px;box-shadow:0 2px 12px #00000012}
+.header{padding:16px;border-radius:18px}
+.header h1{font-size:21px;line-height:1.2}
+h2{font-size:19px}
+input,select{min-height:46px;padding:11px 12px}
+button{min-height:44px}
+.save{min-height:52px;position:sticky;bottom:8px;z-index:5;box-shadow:0 4px 14px #1f6feb44}
+
+.container{max-width:700px;margin:auto;padding:14px}
+.header{background:#1f6feb;color:#fff;padding:18px;border-radius:16px;margin-bottom:14px}
+h1,h2{margin:0 0 12px}.header h1{font-size:24px}.header p{margin:0;opacity:.9}
+ .headerLogo{width:125px;height:125px;border-radius:22px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:68px;box-shadow:0 4px 12px #0002;order:2}
+.header{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.header h1,.header p{flex:1 1 320px}
+.headerLogo{flex:0 0 105px}
+@media(max-width:480px){.headerLogo{width:88px;height:88px;flex-basis:88px;font-size:48px}.header h1{font-size:20px}}
+#orderProductInput{background:#fff}
+
+.card{background:#fff;border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 2px 10px #0001}
+.summary{display:grid;grid-template-columns:1fr 1fr;gap:10px}.stat{background:#f7f9fc;border-radius:12px;padding:14px}
+.stat b{display:block;font-size:22px;color:#1f6feb;margin-top:5px}
+label{display:block;font-weight:bold;font-size:14px;margin:9px 0 5px}
+input,select{width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;font-size:16px}
+.item{border:1px solid #e2e5e9;border-radius:12px;padding:12px;margin:10px 0;background:#fafafa}
+.itemgrid{display:grid;grid-template-columns:1.5fr .7fr 1fr;gap:8px}
+button{border:0;border-radius:10px;padding:11px 13px;font-size:14px;font-weight:bold;cursor:pointer}
+.add{background:#e8f1ff;color:#1f6feb;width:100%;margin-top:6px}.save{background:#1f6feb;color:#fff;width:100%;margin-top:14px;font-size:17px}
+.remove,.danger{background:#fee;color:#c00}.grand{text-align:right;font-size:21px;font-weight:bold;margin-top:14px;color:#1f6feb}
+.search{margin-bottom:10px}.order{border:1px solid #e1e4e8;border-radius:12px;padding:13px;margin-top:10px}
+.orderhead{display:flex;justify-content:space-between;gap:8px}.name{font-weight:bold;font-size:17px}.muted{font-size:13px;color:#666}
+.row{display:flex;justify-content:space-between;border-bottom:1px solid #eee;padding:8px 0}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.pdf{background:#f0f0f0;color:#222;width:100%}
+.empty{text-align:center;color:#777;padding:20px}
+.loginWrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:18px}
+.loginCard{background:#fff;width:100%;max-width:420px;padding:24px;border-radius:18px;box-shadow:0 4px 18px #0002}
+.loginLogo{text-align:center;font-size:30px;margin-bottom:8px}.loginCard h1{text-align:center;font-size:22px}
+.loginCard p{text-align:center;color:#666}.loginBtn{background:#1f6feb;color:#fff;width:100%;font-size:17px;margin-top:14px}
+.userbar{display:flex;justify-content:space-between;align-items:center;gap:10px;background:#fff;padding:10px 12px;border-radius:12px;margin-bottom:14px;box-shadow:0 2px 8px #0001}
+.logout{background:#fee;color:#c00;padding:8px 10px}
+.customerBox{background:#f7f9fc;border-radius:12px;padding:12px;margin-bottom:12px}
+.productEntry{background:#f7f9fc;border:1px solid #e2e5e9;border-radius:14px;padding:13px;margin-bottom:12px}
+.productEntry .add{margin-top:12px}
+.smallBtn{background:#e8f1ff;color:#1f6feb;width:100%;margin-top:8px}
+.hidden{display:none!important}
+@media(max-width:480px){.itemgrid{grid-template-columns:1fr 1fr}.itemgrid>div:last-child{grid-column:1/-1}}
+
+.productHint{font-size:12px;color:#666;margin:6px 2px 0}
+.savedBadge{display:inline-block;background:#e8f1ff;color:#1f6feb;border-radius:999px;padding:4px 8px;font-size:11px;font-weight:700;margin-left:5px}
+@media(max-width:480px){
+  .container{padding:8px}
+  .summary{grid-template-columns:1fr 1fr}
+  .stat{padding:11px}
+  .stat b{font-size:19px}
+  .itemgrid{grid-template-columns:1fr 1fr}
+  .itemgrid>div:last-child{grid-column:1/-1}
+  .actions{grid-template-columns:1fr}
+  .userbar{position:sticky;top:0;z-index:10}
+  .header p{font-size:13px}
+}
+.authTabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0}
+.authTab{background:#eef2f7;color:#333}
+.authTab.active{background:#1f6feb;color:#fff}
+.pwaHint{font-size:12px;color:#777;text-align:center;margin-top:14px;line-height:1.4}
+.designerCredit{font-size:12px;margin-top:7px;opacity:.9;font-weight:600}
+
+.sectionHead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.addItemBtn{background:#e8f1ff;color:#1f6feb;white-space:nowrap}
+.pendingBadge{background:#fff3cd;color:#8a6500;border-radius:999px;padding:5px 10px;font-weight:bold;font-size:13px}
+.pendingOrder{border:1px solid #f0dfaa;background:#fffdf5;border-radius:14px;padding:13px;margin-top:10px}
+.pendingOrder .pendingTitle{font-weight:bold;font-size:17px}
+.completeBtn{background:#14833b;color:#fff;width:100%;margin-top:10px}
+.pendingMeta{font-size:13px;color:#666;margin-top:3px}
+
+.ledgerSummary{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.ledgerStat{background:#f7f9fc;border-radius:11px;padding:10px}
+.ledgerStat b{display:block;font-size:19px;color:#1f6feb;margin-top:3px}
+.ledgerCustomer{border:1px solid #e1e4e8;border-radius:14px;padding:13px;margin-top:10px}
+.ledgerName{font-size:18px;font-weight:bold}
+.ledgerTable{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px}
+.ledgerTable th,.ledgerTable td{padding:7px;border-bottom:1px solid #eee;text-align:left}
+.ledgerTable th:last-child,.ledgerTable td:last-child{text-align:right}
+
+.collapseBtn{width:100%;display:flex;justify-content:space-between;align-items:center;background:#f7f9fc;color:#222;font-size:17px;text-align:left;padding:13px 14px}
+.collapseBtn span,.addItemBtn span{font-size:20px;line-height:1}
+.collapsiblePanel{padding-top:10px}
+
+.quickBoxes{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0 12px}
+.quickBox{background:#f7f9fc;color:#222;border:1px solid #e1e4e8;text-align:left;display:flex;justify-content:space-between;align-items:center}
+.closePanel{background:#fee;color:#c00}
+.orderEntryGrid{margin-top:4px}
+select{background:#fff}
+@media(max-width:480px){.quickBoxes{grid-template-columns:1fr}.orderEntryGrid{grid-template-columns:1fr 1fr}.orderEntryGrid>div:last-child{grid-column:1/-1}}
+
+.summaryHeader{width:100%;background:#f7f9fc;color:#222;display:flex;align-items:center;justify-content:space-between;text-align:left;font-size:18px;padding:12px 14px;margin-bottom:12px}
+.summaryHeader span{font-weight:bold;letter-spacing:2px}
+.todayDetails{border-top:1px solid #eee;margin-top:12px;padding-top:12px}
+.todayDetails h3{margin:0 0 10px}
+.todayOrderDetail{border:1px solid #e1e4e8;border-radius:12px;padding:11px;margin:9px 0;background:#fff}
+.todayOrderHead{display:flex;justify-content:space-between;gap:8px}
+.todayItem{display:flex;justify-content:space-between;border-bottom:1px solid #eee;padding:6px 0;font-size:14px}
+.todayGrand{text-align:right;font-weight:bold;color:#1f6feb;margin-top:8px}
+
+.todayDetails{position:fixed;inset:0;z-index:9999;background:#fff;overflow-y:auto;padding:18px 14px 30px;margin:0;border:0;border-radius:0}
+.todayDetailsHead{position:sticky;top:0;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:4px 0 12px;border-bottom:1px solid #eee;z-index:2}
+.todayDetailsHead h3{margin:0}
+.closeToday{background:#fee;color:#c00;border:0;border-radius:10px;padding:8px 12px;font-size:16px}
+
+.statBtn{border:1px solid #e1e4e8;background:#fff;cursor:pointer;width:100%;font:inherit}
+.statBtn:active{transform:scale(.98)}
+.summaryListOverlay{position:fixed;inset:0;z-index:10000;background:#fff;overflow-y:auto;padding:16px 14px 30px}
+.summaryListTop{position:sticky;top:0;background:#fff;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #eee;padding:4px 0 12px;margin-bottom:10px;z-index:2}
+.summaryListTop h2{margin:0;font-size:20px}
+.summaryListRow{border:1px solid #e1e4e8;border-radius:12px;padding:12px;margin:9px 0;background:#fff;cursor:pointer}
+.summaryListRow:active{background:#f7f9fc}
+.summaryListRow b{font-size:16px}
+.summaryListMeta{font-size:13px;color:#666;margin-top:4px}
+.summaryDetailCard{border:1px solid #e1e4e8;border-radius:12px;padding:12px;margin-top:10px;background:#fff}
+.summaryDetailLine{display:flex;justify-content:space-between;border-bottom:1px solid #eee;padding:7px 0;gap:10px}
+.summaryDetailLine:last-child{border-bottom:0}
+.summaryBack{margin-bottom:10px;background:#f7f9fc;color:#222}
+
+.orderEntryGrid{grid-template-columns:1.25fr 1.5fr .7fr .9fr}
+.orderEntryGrid>div:last-child{grid-column:auto}
+.productEntry{margin-top:10px}
+@media(max-width:650px){
+  .orderEntryGrid{grid-template-columns:1fr 1fr}
+  .orderEntryGrid>div:first-child{grid-column:1/-1}
+  .orderEntryGrid>div:nth-child(2){grid-column:1/-1}
+  .orderEntryGrid>div:last-child{grid-column:1/-1}
+}
+</style>
+</head>
+<body>
+
+<div id="loginScreen" class="loginWrap">
+  <div class="loginCard">
+    <div class="loginLogo">🍰</div>
+    <h1>Habib Naveed Confectionery CSP</h1>
+    <p>Order Booker • Login / Signup</p>
+
+    <div class="authTabs">
+      <button id="loginTab" class="authTab active" onclick="showAuth('login')">Login</button>
+      <button id="signupTab" class="authTab" onclick="showAuth('signup')">Signup</button>
+    </div>
+
+    <div id="loginPanel">
+      <label>Username</label>
+      <input id="loginUser" autocomplete="username" placeholder="Enter username">
+      <label>Password</label>
+      <input id="loginPass" type="password" autocomplete="current-password" placeholder="Enter password"
+             onkeydown="if(event.key==='Enter')login()">
+      <button class="loginBtn" onclick="login()">🔐 Login</button>
+      <div id="loginMsg" class="muted" style="text-align:center;margin-top:10px;color:#c00"></div>
+    </div>
+
+    <div id="signupPanel" class="hidden">
+      <label>Full Name</label>
+      <input id="signupName" autocomplete="name" placeholder="Enter your name">
+      <label>Username</label>
+      <input id="signupUser" autocomplete="username" placeholder="Create username">
+      <label>Password</label>
+      <input id="signupPass" type="password" autocomplete="new-password" placeholder="Create password">
+      <label>Confirm Password</label>
+      <input id="signupPass2" type="password" autocomplete="new-password" placeholder="Confirm password"
+             onkeydown="if(event.key==='Enter')signup()">
+      <button class="loginBtn" onclick="signup()">📝 Create Account</button>
+      <div id="signupMsg" class="muted" style="text-align:center;margin-top:10px"></div>
+    </div>
+
+    <div class="pwaHint">📲 Install this app from your browser menu for an app-like experience.</div>
+  </div>
+</div>
+
+<div id="app" class="container hidden">
+  <div class="userbar">
+    <div><b>👤 <span id="loggedUser"></span></b><div class="muted">📞 0303-9797145</div></div>
+    <button class="logout" onclick="logout()">Logout</button>
+  </div>
+
+  <div class="header">
+    <div class="headerLogo" aria-label="App logo">🍰</div>
+    <h1>Habib Naveed Confectionery CSP</h1>
+    <p>Order Booker • Multiple Items • Offline • Separate User Records</p>
+    <p class="designerCredit">Design by Rashid Javed • 0314-6775046</p>
+  </div>
+
+  <div class="card">
+    <button class="summaryHeader" onclick="toggleTodaySummary()">📊 Today Summary <span id="summaryDots">•••</span></button>
+    <div class="summary">
+      <div class="stat">Orders <b id="todayOrders">0</b></div>
+      <div class="stat">Items <b id="todayItems">0</b></div>
+      <div class="stat">Customers <b id="todayCustomers">0</b></div>
+      <div class="stat">Sales <b id="todaySales">Rs. 0</b></div>
+    </div>
+    <div class="actions">
+      <button class="pdf" onclick="todaySummaryPDF()">📄 Today Summary PDF</button>
+      <button class="pdf" onclick="allOrdersPDF()">📄 My Orders PDF</button>
+    </div>
+
+    <div id="todaySummaryDetails" class="todayDetails hidden">
+      <div class="todayDetailsHead"><h3>📋 Today's Complete Details</h3><button class="closeToday" onclick="toggleTodaySummary()">✖</button></div>
+      <div id="todayDetailsContent"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>➕ New Order</h2>
+    <label>Customer</label>
+    <input id="customerSearch" list="customerList" placeholder="Search/select previous customer..." oninput="customerSelected()">
+    <datalist id="customerList"></datalist>
+    <button class="smallBtn" onclick="newCustomer()">➕ New Customer</button>
+
+    <div class="customerBox">
+      <label>Customer Name</label>
+      <input id="customer" placeholder="Customer name">
+      <label>Mobile</label>
+      <input id="mobile" type="tel" placeholder="03XXXXXXXXX">
+      <label>Address</label>
+      <input id="address" placeholder="Customer address">
+      <div id="customerHistory" class="muted" style="margin-top:8px"></div>
+    </div>
+
+    <div class="sectionHead">
+      <h2 style="margin-top:20px;margin-bottom:0">Order Items</h2>
+      
+    </div>
+    <div id="addItemPanel" class="productEntry">
+      <label>Category</label>
+      <input id="orderCategoryInput" list="orderCategoryList" placeholder="Type/select category..." oninput="categoryChanged()">
+      <datalist id="orderCategoryList"></datalist>
+
+      <label>Product Name</label>
+      <input id="orderProductInput" list="orderProductList" placeholder="Type/search product name..." oninput="orderProductChanged()">
+      <datalist id="orderProductList"></datalist>
+      <select id="orderProduct" class="hidden" aria-hidden="true"></select>
+
+      <div class="itemgrid orderEntryGrid">
+        <div>
+          <label>Qty</label>
+          <input id="newQty" type="number" min="1" value="1" oninput="updateNewProductTotal()">
+        </div>
+        <div>
+          <label>Rate</label>
+          <input id="newRate" type="number" min="0" step="0.01" placeholder="Rate" oninput="updateNewProductTotal()">
+        </div>
+        <div>
+          <label>Amount</label>
+          <input id="newTotal" readonly value="Rs. 0.00">
+        </div>
+      </div>
+
+      <button class="add" onclick="addProductFromBox()">💾 Save</button>
+    </div>
+
+    <div id="items"></div>
+
+    <div class="grand">Grand Total: <span id="grandTotal">Rs. 0.00</span></div>
+    <button class="save" onclick="saveOrder()">💾 Save Complete Order</button>
+  </div>
+
+  <div class="card">
+    <div class="sectionHead">
+      <h2 style="margin:0">⏳ Pending Orders</h2>
+      <span class="pendingBadge" id="pendingCount">0</span>
+    </div>
+    <div id="pendingOrders"></div>
+  </div>
+
+  <div class="card">
+    <h2>📋 My Saved Orders</h2>
+    <input class="search" id="search" type="search" placeholder="🔎 Search customer, mobile or product..." oninput="renderOrders()">
+    <div id="orders"></div>
+  </div>
+  <div id="summaryListOverlay" class="summaryListOverlay hidden">
+    <div class="summaryListTop">
+      <h2 id="summaryListTitle">Details</h2>
+      <button class="closeToday" onclick="closeSummaryList()">✖</button>
+    </div>
+    <div id="summaryListContent"></div>
+  </div>
+</div>
+
+<script>
+const DEFAULT_USERS = {
+  admin:{password:"1234",name:"Admin"},
+  booker1:{password:"1234",name:"Booker 1"},
+  booker2:{password:"1234",name:"Booker 2"},
+  booker3:{password:"1234",name:"Booker 3"}
+};
+
+const USERS_KEY = "orderBookerUsers_v3";
+function loadUsers(){
+  try{return JSON.parse(localStorage.getItem(USERS_KEY)||"null") || {...DEFAULT_USERS};}
+  catch(e){return {...DEFAULT_USERS};}
+}
+function saveUsers(users){
+  localStorage.setItem(USERS_KEY, JSON.stringify(users));
+}
+function getUsers(){ return loadUsers(); }
+
+let currentUser = sessionStorage.getItem("orderBookerUser") || "";
+let items=[];
+let orders=[];
+let products=[];
+let productCatalog={};
+
+function userKey(){ return "orderBookerPro_"+currentUser; }
+
+function loadUserData(){
+  orders=JSON.parse(localStorage.getItem(userKey())||"[]");
+  try{productCatalog=JSON.parse(localStorage.getItem(userKey()+"_products")||"{}")||{};}
+  catch(e){productCatalog={};}
+}
+function saveUserData(){
+  localStorage.setItem(userKey(),JSON.stringify(orders));
+  localStorage.setItem(userKey()+"_products",JSON.stringify(productCatalog));
+}
+function todayKey(){
+  const d=new Date();
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+function money(n){
+  return Number(n||0).toLocaleString("en-PK",{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function esc(s){
+  return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+}
+
+function showAuth(mode){
+  const lp=document.getElementById("loginPanel"), sp=document.getElementById("signupPanel");
+  const lt=document.getElementById("loginTab"), st=document.getElementById("signupTab");
+  if(mode==="signup"){
+    lp.classList.add("hidden"); sp.classList.remove("hidden");
+    lt.classList.remove("active"); st.classList.add("active");
+  }else{
+    sp.classList.add("hidden"); lp.classList.remove("hidden");
+    st.classList.remove("active"); lt.classList.add("active");
+  }
+}
+function signup(){
+  const name=document.getElementById("signupName").value.trim();
+  const u=document.getElementById("signupUser").value.trim().toLowerCase();
+  const p=document.getElementById("signupPass").value;
+  const p2=document.getElementById("signupPass2").value;
+  const msg=document.getElementById("signupMsg");
+  if(!name || !u || !p){msg.style.color="#c00";msg.textContent="All fields are required.";return}
+  if(!/^[a-z0-9._-]{3,30}$/.test(u)){msg.style.color="#c00";msg.textContent="Username: 3-30 chars, letters/numbers . _ - only.";return}
+  if(p.length<4){msg.style.color="#c00";msg.textContent="Password must be at least 4 characters.";return}
+  if(p!==p2){msg.style.color="#c00";msg.textContent="Passwords do not match.";return}
+  const users=getUsers();
+  if(users[u]){msg.style.color="#c00";msg.textContent="Username already exists.";return}
+  users[u]={password:p,name:name};
+  saveUsers(users);
+  msg.style.color="#14833b";
+  msg.textContent="Account created successfully. You can now login.";
+  document.getElementById("loginUser").value=u;
+  document.getElementById("loginPass").value="";
+  setTimeout(()=>showAuth("login"),700);
+}
+
+function login(){
+  const u=document.getElementById("loginUser").value.trim().toLowerCase();
+  const p=document.getElementById("loginPass").value;
+  const users=getUsers();
+  if(users[u] && users[u].password===p){
+    currentUser=u;
+    sessionStorage.setItem("orderBookerUser",u);
+    document.getElementById("loginMsg").textContent="";
+    openApp();
+  }else{
+    document.getElementById("loginMsg").textContent="Invalid username or password.";
+  }
+}
+function logout(){
+  sessionStorage.removeItem("orderBookerUser");
+  currentUser="";
+  document.getElementById("app").classList.add("hidden");
+  document.getElementById("loginScreen").classList.remove("hidden");
+  document.getElementById("loginUser").value="";
+  document.getElementById("loginPass").value="";
+}
+function openApp(){
+  document.getElementById("loginScreen").classList.add("hidden");
+  document.getElementById("app").classList.remove("hidden");
+  document.getElementById("loggedUser").textContent=getUsers()[currentUser].name+" ("+currentUser+")";
+  loadUserData();
+  items=[];
+  renderItems();
+  renderOrders();
+  renderPendingOrders();
+  updateSummary();
+  renderCustomerList();
+  renderProductList();
+  updateNewProductTotal();
+}
+
+function getCustomers(){
+  const map={};
+  orders.forEach(o=>{
+    const key=(o.mobile||o.customer||"").trim().toLowerCase();
+    if(!key)return;
+    if(!map[key]) map[key]={name:o.customer,mobile:o.mobile,orders:0,sales:0};
+    map[key].orders++;
+    map[key].sales+=Number(o.grand)||0;
+    if(o.customer)map[key].name=o.customer;
+    if(o.mobile)map[key].mobile=o.mobile;
+  });
+  return Object.values(map);
+}
+function renderCustomerList(){
+  const list=document.getElementById("customerList");
+  if(!list)return;
+  list.innerHTML=getCustomers().map(c=>`<option value="${esc(c.mobile)}">${esc(c.name)} — ${esc(c.mobile)}</option>`).join("");
+}
+
+function renderProductList(){
+  const list=document.getElementById("orderProductList");
+  if(!list)return;
+  const cat=(document.getElementById("orderCategoryInput")?.value||"").trim().toLowerCase();
+  const filtered=products
+    .filter(p=>!cat || String(p.category||"").toLowerCase()===cat)
+    .sort((a,b)=>String(a.name).localeCompare(String(b.name)));
+  list.innerHTML=filtered.map(p=>`<option value="${esc(p.name)}"></option>`).join("");
+}
+function renderCategorySelect(){
+  const list=document.getElementById("orderCategoryList");
+  if(!list)return;
+  const cats=[...new Set(products.map(p=>String(p.category||"").trim()).filter(Boolean))].sort();
+  list.innerHTML=cats.map(c=>`<option value="${esc(c)}"></option>`).join("");
+}
+function renderCategoryList(){
+  const list=document.getElementById("categoryList");
+  if(!list)return;
+  const cats=[...new Set(products.map(p=>String(p.category||"").trim()).filter(Boolean))].sort();
+  list.innerHTML=cats.map(c=>`<option value="${esc(c)}"></option>`).join("");
+}
+function orderProductChanged(){
+  const input=document.getElementById("orderProductInput");
+  const name=(input?.value||"").trim().toLowerCase();
+  const cat=(document.getElementById("orderCategoryInput")?.value||"").trim().toLowerCase();
+  const p=products.find(x=>
+    String(x.name).toLowerCase()===name &&
+    (!cat || String(x.category||"").toLowerCase()===cat)
+  );
+  if(p){
+    document.getElementById("newRate").value=p.rate;
+    updateNewProductTotal();
+  }
+}
+function renderCategorySelect(){
+  const select=document.getElementById("orderCategory");
+  if(!select)return;
+  const cats=[...new Set(products.map(p=>String(p.category||"").trim()).filter(Boolean))].sort();
+  select.innerHTML='<option value="">Select Category</option>'+cats.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join("");
+}
+
+function renderCategoryList(){
+  const list=document.getElementById("categoryList");
+  if(!list)return;
+  const cats=[...new Set(products.map(p=>String(p.category||"").trim()).filter(Boolean))].sort();
+  list.innerHTML=cats.map(c=>`<option value="${esc(c)}"></option>`).join("");
+}
+
+function categoryChanged(){
+  renderProductList();
+  const input=document.getElementById("orderProductInput");
+  if(input)input.value="";
+  document.getElementById("newRate").value="";
+  document.getElementById("newTotal").value="Rs. 0.00";
+}
+function orderProductChanged(){
+  const name=document.getElementById("orderProduct").value.trim().toLowerCase();
+  const p=products.find(x=>String(x.name).toLowerCase()===name);
+  if(p){
+    document.getElementById("newRate").value=p.rate;
+    updateNewProductTotal();
+  }
+}
+
+
+function customerSelected(){
+  const q=document.getElementById("customerSearch").value.trim().toLowerCase();
+  const c=getCustomers().find(x=>x.mobile.toLowerCase()===q || x.name.toLowerCase()===q);
+  if(c){
+    document.getElementById("customer").value=c.name;
+    document.getElementById("mobile").value=c.mobile;
+    const latest=orders.filter(o=>(o.mobile||"")===c.mobile).sort((a,b)=>b.id-a.id)[0];
+    document.getElementById("address").value=latest?.address||"";
+    document.getElementById("customerHistory").textContent=
+      "Previous orders: "+c.orders+" • Previous sales: Rs. "+money(c.sales);
+  }
+}
+function newCustomer(){
+  document.getElementById("customerSearch").value="";
+  document.getElementById("customer").value="";
+  document.getElementById("mobile").value="";
+  document.getElementById("address").value="";
+  document.getElementById("customerHistory").textContent="New customer";
+  document.getElementById("customer").focus();
+}
+
+
+
+function togglePanel(id, btn){
+  const panel=document.getElementById(id);
+  if(!panel)return;
+  const hidden=panel.classList.toggle("hidden");
+  const span=btn.querySelector("span");
+  if(span)span.textContent=hidden?"＋":"−";
+  if(!hidden && id==="addItemPanel"){
+    setTimeout(()=>document.getElementById("registerProduct").focus(),120);
+  }
+}
+
+function updateNewProductTotal(){
+  const q=Number(document.getElementById("newQty").value)||0;
+  const r=Number(document.getElementById("newRate").value)||0;
+  document.getElementById("newTotal").value="Rs. "+money(q*r);
+}
+
+function addProductFromBox(){
+  const category=document.getElementById("orderCategoryInput").value.trim();
+  const product=document.getElementById("orderProductInput").value.trim();
+  const qty=Number(document.getElementById("newQty").value);
+  const rate=Number(document.getElementById("newRate").value);
+
+  if(!category){alert("Category enter/select karein.");return}
+  if(!product){alert("Product name enter/select karein.");return}
+  if(qty<=0 || !Number.isFinite(qty)){alert("Qty sahi enter karein.");return}
+  if(rate<0 || !Number.isFinite(rate)){alert("Rate sahi enter karein.");return}
+
+  const existing=products.find(x=>
+    String(x.name).toLowerCase()===product.toLowerCase() &&
+    String(x.category||"").toLowerCase()===category.toLowerCase()
+  );
+  if(existing){
+    existing.rate=rate;
+  }else{
+    products.push({id:Date.now()+Math.random(),name:product,category,rate});
+  }
+  saveUserData();
+
+  items.push({id:Date.now()+Math.random(),product,category,qty,rate});
+  renderItems();
+
+  document.getElementById("orderProductInput").value="";
+  document.getElementById("newQty").value=1;
+  document.getElementById("newRate").value="";
+  document.getElementById("newTotal").value="Rs. 0.00";
+
+  renderCategorySelect();
+  document.getElementById("orderCategoryInput").value=category;
+  renderProductList();
+  setTimeout(()=>document.getElementById("orderProductInput").focus(),80);
+}
+function addItem(product="",qty=1,rate=""){
+  items.push({id:Date.now()+Math.random(),product,qty,rate});
+  renderItems();
+}
+function renderItems(){
+  document.getElementById("items").innerHTML=items.map((x,i)=>`
+  <div class="item">
+    <label>Product ${i+1} ${x.category?`• ${esc(x.category)}`:""}</label>
+    <input value="${esc(x.product)}" placeholder="Product name" oninput="items[${i}].product=this.value">
+    <div class="itemgrid">
+      <div><label>Qty</label><input type="number" min="1" value="${x.qty}" oninput="items[${i}].qty=this.value;updateTotals()"></div>
+      <div><label>Rate</label><input type="number" min="0" step="0.01" value="${x.rate}" oninput="items[${i}].rate=this.value;updateTotals()"></div>
+      <div><label>Total</label><input readonly id="it${i}" value="${money((Number(x.qty)||0)*(Number(x.rate)||0))}"></div>
+    </div>
+    <button class="remove" onclick="removeItem(${i})">🗑️ Remove</button>
+  </div>`).join("");
+  updateTotals();
+}
+function removeItem(i){
+  if(items.length===1){alert("At least one item is required.");return}
+  items.splice(i,1);renderItems();
+}
+function updateTotals(){
+  let t=0;
+  items.forEach((x,i)=>{
+    let v=(Number(x.qty)||0)*(Number(x.rate)||0);t+=v;
+    let el=document.getElementById("it"+i);if(el)el.value=money(v);
+  });
+  document.getElementById("grandTotal").textContent="Rs. "+money(t);
+}
+
+function saveOrder(){
+  const customer=document.getElementById("customer").value.trim();
+  const mobile=document.getElementById("mobile").value.trim();
+
+  if(!customer||!mobile){alert("Customer Name aur Mobile enter karein.");return}
+  if(!items.length){alert("Kam az kam 1 product add karein.");return}
+
+  for(const x of items){
+    if(!String(x.product).trim()||Number(x.qty)<=0||!Number.isFinite(Number(x.qty))||Number(x.rate)<0||!Number.isFinite(Number(x.rate))){
+      alert("Har item ka Product, Qty aur Rate sahi enter karein.");return;
+    }
+  }
+
+  // Convert every value to a real number before calculating/saving.
+  const clean=items.map(x=>{
+    const qty=Number(x.qty);
+    const rate=Number(x.rate);
+    const total=qty*rate;
+    productCatalog[String(x.product).trim()]={rate:rate,updatedAt:Date.now()};
+    return {product:String(x.product).trim(),category:String(x.category||"").trim(),qty,rate,total};
+  });
+
+  const grand=clean.reduce((sum,x)=>sum+Number(x.total),0);
+
+  const order={
+    id:Date.now(),
+    orderNo:"ORD-"+String(Date.now()).slice(-6),
+    bookedBy:currentUser,
+    customer,
+    mobile,
+    address:document.getElementById("address").value.trim(),
+    items:clean,
+    grand:Number(grand),
+    date:new Date().toLocaleString("en-PK"),
+    dateKey:todayKey()
+  };
+
+  orders.unshift(order);
+  saveUserData();
+
+  // WhatsApp confirmation.
+  let waNumber = mobile.replace(/\D/g,"");
+  if(waNumber.startsWith("0")) waNumber="92"+waNumber.slice(1);
+  const waText = encodeURIComponent(
+    "Assalam-o-Alaikum " + customer + "\n\n" +
+    "Aap ka order successfully book ho gaya hai.\n" +
+    "Order Number: " + order.orderNo + "\n" +
+    "Order Amount: Rs. " + money(grand) + "\n" +
+    "Date: " + order.date + "\n\n" +
+    "Habib Naveed Confectionery CSP"
+  );
+  const waUrl = "https://wa.me/" + waNumber + "?text=" + waText;
+
+  document.getElementById("customer").value="";
+  document.getElementById("mobile").value="";
+  document.getElementById("customerSearch").value="";
+  document.getElementById("customerHistory").textContent="";
+  items=[];
+  renderItems();
+  renderOrders();
+  updateSummary();
+  renderCustomerList();
+  renderProductList();
+  updateNewProductTotal();
+
+  alert("Order saved successfully ✅\n\nAmount: Rs. "+money(grand)+"\nOrder No: "+order.orderNo+"\n\nWhatsApp message tayyar hai.");
+  window.open(waUrl,"_blank");
+}
+
+function getPendingOrders(){
+  return orders.filter(o=>(o.status||"pending")==="pending");
+}
+function renderPendingOrders(){
+  const box=document.getElementById("pendingOrders");
+  const badge=document.getElementById("pendingCount");
+  if(!box)return;
+  const list=getPendingOrders();
+  badge.textContent=list.length;
+  if(!list.length){
+    box.innerHTML='<div class="empty">No pending orders. 🎉</div>';
+    return;
+  }
+  box.innerHTML=list.map(o=>`
+    <div class="pendingOrder">
+      <div class="pendingTitle">${esc(o.orderNo)} — ${esc(o.customer)}</div>
+      <div class="pendingMeta">📱 ${esc(o.mobile)} • 📍 ${esc(o.address||"No address")} • ${esc(o.date)}</div>
+      ${o.items.map(x=>`<div class="row"><span>${x.category?`[${esc(x.category)}] `:""}${esc(x.product)} × ${x.qty}</span><b>Rs. ${money(x.total)}</b></div>`).join("")}
+      <div class="grand">Rs. ${money(o.grand)}</div>
+      <button class="completeBtn" onclick="completeOrder(${o.id})">✅ Order Complete</button>
+    </div>`).join("");
+}
+function completeOrder(id){
+  const o=orders.find(x=>x.id===id);
+  if(!o)return;
+  if(!confirm("Mark "+o.orderNo+" as complete?"))return;
+  o.status="completed";
+  o.completedAt=new Date().toLocaleString("en-PK");
+  saveUserData();
+  renderPendingOrders();
+  renderOrders();
+  updateSummary();
+}
+
+function deleteOrder(id){
+  if(!confirm("Delete this complete order?"))return;
+  orders=orders.filter(o=>o.id!==id);
+  saveUserData();renderOrders();renderPendingOrders();updateSummary();renderCustomerList();renderProductList();renderCustomerLedgerList();renderCustomerLedger();
+}
+
+function renderCustomerLedgerList(){
+  const list=document.getElementById("ledgerCustomerList");
+  if(!list)return;
+  list.innerHTML=getCustomers().sort((a,b)=>String(a.name).localeCompare(String(b.name)))
+    .map(c=>`<option value="${esc(c.mobile)}">${esc(c.name)} — ${esc(c.mobile)}</option>`).join("");
+}
+function renderCustomerLedger(){
+  const box=document.getElementById("customerLedger");
+  const q=(document.getElementById("ledgerSearch")?.value||"").trim().toLowerCase();
+  if(!box)return;
+
+  const groups={};
+  orders.forEach(o=>{
+    const key=(o.mobile||o.customer||"").trim().toLowerCase();
+    if(!key)return;
+    if(q && !(String(o.customer||"").toLowerCase().includes(q) || String(o.mobile||"").toLowerCase().includes(q))) return;
+    if(!groups[key]) groups[key]={name:o.customer||"",mobile:o.mobile||"",orders:[],total:0,completed:0,pending:0};
+    groups[key].orders.push(o);
+    groups[key].total += Number(o.grand)||0;
+    if((o.status||"pending")==="completed") groups[key].completed++;
+    else groups[key].pending++;
+  });
+
+  const customers=Object.values(groups).sort((a,b)=>String(a.name).localeCompare(String(b.name)));
+  if(!customers.length){
+    box.innerHTML='<div class="empty">Customer ka record nahi mila.</div>';
+    return;
+  }
+
+  box.innerHTML=customers.map(c=>{
+    const rows=c.orders.sort((a,b)=>b.id-a.id).map(o=>`
+      <tr>
+        <td>${esc(o.orderNo)}</td>
+        <td>${esc(o.dateKey||"")}</td>
+        <td>${(o.status||"pending")==="completed"?"✅ Completed":"⏳ Pending"}</td>
+        <td>Rs. ${money(o.grand)}</td>
+      </tr>`).join("");
+    return `<div class="ledgerCustomer">
+      <div class="ledgerName">${esc(c.name)}</div>
+      <div class="muted">📱 ${esc(c.mobile)}</div>
+      <div class="ledgerSummary">
+        <div class="ledgerStat">Total Orders <b>${c.orders.length}</b></div>
+        <div class="ledgerStat">Completed <b>${c.completed}</b></div>
+        <div class="ledgerStat">Pending <b>${c.pending}</b></div>
+        <div class="ledgerStat">Total Sales <b>Rs. ${money(c.total)}</b></div>
+      </div>
+      <table class="ledgerTable">
+        <tr><th>Order</th><th>Date</th><th>Status</th><th>Amount</th></tr>
+        ${rows}
+      </table>
+    </div>`;
+  }).join("");
+}
+
+function renderOrders(){
+  const q=document.getElementById("search").value.toLowerCase().trim();
+  const list=orders.filter(o=>
+    String(o.customer||"").toLowerCase().includes(q)||
+    String(o.mobile||"").toLowerCase().includes(q)||
+    (o.items||[]).some(x=>String(x.product||"").toLowerCase().includes(q))
+  );
+  const box=document.getElementById("orders");
+  if(!list.length){box.innerHTML='<div class="empty">No orders found.</div>';return}
+  box.innerHTML=list.map(o=>`
+  <div class="order">
+    <div class="orderhead">
+      <div><div class="name">${esc(o.customer)}</div><div class="muted">${esc(o.orderNo)} • 📱 ${esc(o.mobile)} • 📍 ${esc(o.address||"No address")}</div></div>
+      <button class="danger" onclick="deleteOrder(${o.id})">Delete</button>
+    </div>
+    ${o.items.map(x=>`<div class="row"><span>${x.category?`[${esc(x.category)}] `:""}${esc(x.product)} × ${x.qty}</span><b>Rs. ${money(x.total)}</b></div>`).join("")}
+    <div class="grand">Grand Total: Rs. ${money(o.grand)}</div>
+    <div class="muted">🕒 ${esc(o.date)} • 👤 ${esc(o.bookedBy||currentUser)} • ${o.status==="completed"?"✅ Completed":"⏳ Pending"}</div>
+    <button class="pdf" style="margin-top:10px;width:100%" onclick="singleOrderPDF(${o.id})">📄 Generate Order PDF</button>
+  </div>`).join("");
+}
+function getTodayOrders(){return orders.filter(o=>o.dateKey===todayKey())}
+
+
+function openSummaryList(type){
+  const overlay=document.getElementById("summaryListOverlay");
+  const title=document.getElementById("summaryListTitle");
+  const box=document.getElementById("summaryListContent");
+  if(!overlay||!box)return;
+  overlay.classList.remove("hidden");
+  document.body.style.overflow="hidden";
+
+  const a=getTodayOrders();
+
+  if(type==="orders"){
+    title.textContent="📦 Today — Orders";
+    box.innerHTML=a.length ? a.map(o=>`
+      <div class="summaryListRow" onclick="showSummaryOrder(${o.id})">
+        <b>${esc(o.orderNo)}</b>
+        <div class="summaryListMeta">${esc(o.customer)} • 📱 ${esc(o.mobile)}</div>
+        <div class="summaryListMeta">${o.status==="completed"?"✅ Completed":"⏳ Pending"} • Rs. ${money(o.grand)}</div>
+      </div>`).join("") : '<div class="empty">Aaj koi order nahi.</div>';
+  }
+
+  if(type==="items"){
+    title.textContent="🛒 Today — Items";
+    const map={};
+    a.forEach(o=>o.items.forEach(x=>{
+      const key=(x.category||"")+"|"+x.product;
+      if(!map[key])map[key]={category:x.category||"",product:x.product,qty:0,amount:0};
+      map[key].qty+=Number(x.qty)||0;
+      map[key].amount+=Number(x.total)||0;
+    }));
+    const rows=Object.values(map).sort((x,y)=>x.product.localeCompare(y.product));
+    box.innerHTML=rows.length ? rows.map(x=>`
+      <div class="summaryListRow">
+        <b>${x.category?`[${esc(x.category)}] `:""}${esc(x.product)}</b>
+        <div class="summaryListMeta">Total Qty: ${x.qty} • Amount: Rs. ${money(x.amount)}</div>
+      </div>`).join("") : '<div class="empty">Aaj koi item nahi.</div>';
+  }
+
+  if(type==="customers"){
+    title.textContent="👤 Today — Customers";
+    const map={};
+    a.forEach(o=>{
+      const key=o.mobile||o.customer;
+      if(!map[key])map[key]={name:o.customer||"",mobile:o.mobile||"",orders:0,sales:0};
+      map[key].orders++;
+      map[key].sales+=Number(o.grand)||0;
+    });
+    const rows=Object.values(map).sort((x,y)=>x.name.localeCompare(y.name));
+    box.innerHTML=rows.length ? rows.map(x=>`
+      <div class="summaryListRow">
+        <b>${esc(x.name)}</b>
+        <div class="summaryListMeta">📱 ${esc(x.mobile)} • Orders: ${x.orders} • Sales: Rs. ${money(x.sales)}</div>
+      </div>`).join("") : '<div class="empty">Aaj koi customer nahi.</div>';
+  }
+
+  if(type==="sales"){
+    title.textContent="💰 Today — Sales";
+    const total=a.reduce((s,o)=>s+(Number(o.grand)||0),0);
+    box.innerHTML=`
+      <div class="summaryDetailCard">
+        <div class="summaryDetailLine"><b>Total Orders</b><b>${a.length}</b></div>
+        <div class="summaryDetailLine"><b>Total Sales</b><b>Rs. ${money(total)}</b></div>
+      </div>
+      ${a.map(o=>`<div class="summaryListRow" onclick="showSummaryOrder(${o.id})">
+        <b>${esc(o.orderNo)}</b>
+        <div class="summaryListMeta">${esc(o.customer)} • ${o.status==="completed"?"✅ Completed":"⏳ Pending"}</div>
+        <div class="summaryListMeta">Rs. ${money(o.grand)}</div>
+      </div>`).join("")}`;
+  }
+}
+
+function showSummaryOrder(id){
+  const o=orders.find(x=>x.id===id);
+  if(!o)return;
+  const title=document.getElementById("summaryListTitle");
+  const box=document.getElementById("summaryListContent");
+  title.textContent=o.orderNo;
+  box.innerHTML=`
+    <button class="summaryBack" onclick="openSummaryList('orders')">← Back to Orders</button>
+    <div class="summaryDetailCard">
+      <div class="summaryDetailLine"><b>Customer</b><span>${esc(o.customer)}</span></div>
+      <div class="summaryDetailLine"><b>Mobile</b><span>${esc(o.mobile)}</span></div>
+      <div class="summaryDetailLine"><b>Address</b><span>${esc(o.address||"")}</span></div>
+      <div class="summaryDetailLine"><b>Status</b><span>${o.status==="completed"?"✅ Completed":"⏳ Pending"}</span></div>
+      <div class="summaryDetailLine"><b>Total</b><b>Rs. ${money(o.grand)}</b></div>
+    </div>
+    <div class="summaryDetailCard">
+      <h3>Items</h3>
+      ${o.items.map(x=>`<div class="summaryDetailLine">
+        <span>${x.category?`[${esc(x.category)}] `:""}${esc(x.product)} × ${x.qty}</span>
+        <span>Rs. ${money(x.total)}</span>
+      </div>`).join("")}
+    </div>`;
+}
+
+function closeSummaryList(){
+  const overlay=document.getElementById("summaryListOverlay");
+  if(overlay)overlay.classList.add("hidden");
+  document.body.style.overflow="";
+}
+
+function toggleTodaySummary(){
+  const panel=document.getElementById("todaySummaryDetails");
+  const dots=document.getElementById("summaryDots");
+  if(!panel)return;
+  const hidden=panel.classList.toggle("hidden");
+  if(dots)dots.textContent=hidden?"•••":"−";
+  document.body.style.overflow=hidden?"":"hidden";
+  if(!hidden)renderTodayDetails();
+}
+function renderTodayDetails(){
+  const box=document.getElementById("todayDetailsContent");
+  if(!box)return;
+  const a=getTodayOrders();
+  if(!a.length){
+    box.innerHTML='<div class="empty">Aaj abhi koi order nahi hai.</div>';
+    return;
+  }
+  box.innerHTML=a.map(o=>`
+    <div class="todayOrderDetail">
+      <div class="todayOrderHead">
+        <div><b>${esc(o.orderNo)}</b><div class="muted">${esc(o.customer)} • 📱 ${esc(o.mobile)}</div><div class="muted">📍 ${esc(o.address||"No address")}</div></div>
+        <b>Rs. ${money(o.grand)}</b>
+      </div>
+      ${o.items.map(x=>`<div class="todayItem"><span>${x.category?`[${esc(x.category)}] `:""}${esc(x.product)} × ${x.qty} @ Rs. ${money(x.rate)}</span><b>Rs. ${money(x.total)}</b></div>`).join("")}
+      <div class="todayGrand">${o.status==="completed"?"✅ Completed":"⏳ Pending"} • Rs. ${money(o.grand)}</div>
+    </div>`).join("");
+}
+
+function updateSummary(){
+  const a=getTodayOrders();
+  const itemCount=a.reduce((s,o)=>s+o.items.reduce((x,i)=>x+i.qty,0),0);
+  const sales=a.reduce((s,o)=>s+o.grand,0);
+  const customers=new Set(a.map(o=>o.mobile||o.customer)).size;
+  document.getElementById("todayOrders").textContent=a.length;
+  document.getElementById("todayItems").textContent=itemCount;
+  document.getElementById("todayCustomers").textContent=customers;
+  document.getElementById("todaySales").textContent="Rs. "+money(sales);
+  const panel=document.getElementById("todaySummaryDetails");
+  if(panel && !panel.classList.contains("hidden")) renderTodayDetails();
+}
+
+
+function printTodayCategoryPDF(){
+  const today=new Date().toISOString().slice(0,10);
+  const todays=(orders||[]).filter(o=>String(o.date||"").slice(0,10)===today);
+  const grouped={};
+  todays.forEach(o=>{
+    (o.items||[]).forEach(it=>{
+      const cat=String(it.category||"Uncategorized").trim()||"Uncategorized";
+      const product=String(it.product||"").trim();
+      const qty=Number(it.qty)||0;
+      const amount=(Number(it.rate)||0)*qty;
+      if(!grouped[cat]) grouped[cat]={};
+      if(!grouped[cat][product]) grouped[cat][product]={qty:0,amount:0};
+      grouped[cat][product].qty+=qty;
+      grouped[cat][product].amount+=amount;
+    });
+  });
+  const cats=Object.keys(grouped).sort((a,b)=>a.localeCompare(b));
+  if(!cats.length){alert("Aaj ke orders mein koi product nahi mila.");return}
+  let grandQty=0,grandAmount=0;
+  let html=`<html><head><title>Today Category Wise Product Report</title>
+  <style>
+  body{font-family:Arial,sans-serif;padding:28px;color:#222}
+  h1{text-align:center;margin:0 0 5px}.date{text-align:center;margin-bottom:24px}
+  h2{margin:22px 0 8px;border-bottom:1px solid #999;padding-bottom:6px}
+  table{width:100%;border-collapse:collapse;margin-bottom:8px}
+  th,td{border:1px solid #bbb;padding:8px;text-align:left}
+  th:nth-child(2),td:nth-child(2),th:nth-child(3),td:nth-child(3){text-align:right}
+  .total{font-weight:bold;text-align:right}
+  .grand{font-size:18px;font-weight:bold;border-top:2px solid #222;padding-top:12px;margin-top:18px}
+  </style></head><body>
+  <h1>📦 Category Wise Product Report</h1>
+  <div class="date">Today: ${today}</div>`;
+  cats.forEach(cat=>{
+    html+=`<h2>${esc(cat)}</h2><table><tr><th>Product</th><th>Qty</th><th>Amount</th></tr>`;
+    let catQty=0,catAmount=0;
+    Object.keys(grouped[cat]).sort((a,b)=>a.localeCompare(b)).forEach(product=>{
+      const x=grouped[cat][product];
+      catQty+=x.qty;catAmount+=x.amount;grandQty+=x.qty;grandAmount+=x.amount;
+      html+=`<tr><td>${esc(product)}</td><td>${x.qty}</td><td>Rs. ${money(x.amount)}</td></tr>`;
+    });
+    html+=`<tr><td class="total">Category Total</td><td>${catQty}</td><td>Rs. ${money(catAmount)}</td></tr></table>`;
+  });
+  html+=`<div class="grand">Grand Total — Qty: ${grandQty} &nbsp;&nbsp; Amount: Rs. ${money(grandAmount)}</div>
+  <script>window.onload=()=>window.print()<\/script>
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(()=>{}));
+}
+let deferredInstallPrompt = null;
+window.addEventListener("beforeinstallprompt", e => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  const btn = document.getElementById("installAppBtn");
+  if (btn) btn.style.display = "inline-flex";
+});
+async function installApp() {
+  if (!deferredInstallPrompt) {
+    alert("Install option browser ke menu (⋮) mein 'Install app' / 'Add to Home screen' se bhi mil sakta hai.");
+    return;
+  }
+  deferredInstallPrompt.prompt();
+  await deferredInstallPrompt.userChoice;
+  deferredInstallPrompt = null;
+  const btn = document.getElementById("installAppBtn");
+  if (btn) btn.style.display = "none";
+}
+window.addEventListener("appinstalled", () => {
+  const btn = document.getElementById("installAppBtn");
+  if (btn) btn.style.display = "none";
+});
+</script>
+
+
+<button id="installAppBtn" onclick="installApp()" style="display:none;position:fixed;right:16px;bottom:16px;z-index:9999;border:0;border-radius:14px;padding:12px 16px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px #0003;">📲 Install App</button>
+
+</body></html>`;
+  const w=window.open("","_blank");
+  if(w){w.document.write(html);w.document.close();}
+}
+function printPDF(title,body){
+  const w=window.open("","_blank");
+  if(!w){alert("Popup blocked. Please allow popups for this file.");return}
+  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${esc(title)}</title>
+  <style>
+  body{font-family:Calibri,"Segoe UI",Arial,sans-serif;margin:30px;color:#111}h1{text-align:center;margin-bottom:5px}
+  h2{margin-top:25px}table{width:100%;border-collapse:collapse;margin-top:12px}
+  th,td{border:1px solid #bbb;padding:8px;text-align:left}th{background:#eee}
+  .right{text-align:right}.total{font-size:20px;font-weight:bold;text-align:right;margin-top:15px}
+  .meta{margin:4px 0;color:#444}@media print{button{display:none}}
+  </style></head><body>${body}
+  <script>window.onload=function(){setTimeout(function(){window.print()},300)}<\/script>
+</body></html>`);
+  w.document.close();
+}
+function singleOrderPDF(id){
+  const o=orders.find(x=>x.id===id);if(!o)return;
+  let rows=o.items.map(x=>`<tr><td>${esc(x.category||"")}</td><td>${esc(x.product)}</td><td>${x.qty}</td><td class="right">Rs. ${money(x.rate)}</td><td class="right">Rs. ${money(x.total)}</td></tr>`).join("");
+  const body=`<h1>HABIB NAVEED CONFECTIONERY CSP</h1><h2>Order Invoice</h2>
+  <div class="meta"><b>Booked By:</b> ${esc(o.bookedBy||currentUser)}</div>
+  <div class="meta"><b>Order No:</b> ${esc(o.orderNo)}</div>
+  <div class="meta"><b>Customer:</b> ${esc(o.customer)}</div>
+  <div class="meta"><b>Mobile:</b> ${esc(o.mobile)}</div>
+  <div class="meta"><b>Date:</b> ${esc(o.date)}</div>
+  <table><tr><th>Category</th><th>Product</th><th>Qty</th><th>Rate</th><th>Total</th></tr>${rows}</table>
+  <div class="total">Grand Total: Rs. ${money(o.grand)}</div><div class="meta" style="text-align:center;margin-top:24px">Design by Rashid Javed • 0314-6775046</div>`;
+  printPDF("Order "+o.orderNo,body);
+}
+function todaySummaryPDF(){
+  const a=getTodayOrders();
+  const items=a.reduce((s,o)=>s+o.items.reduce((x,i)=>x+i.qty,0),0);
+  const sales=a.reduce((s,o)=>s+o.grand,0);
+  const customers=new Set(a.map(o=>o.mobile||o.customer)).size;
+  let rows=a.map(o=>`<tr><td>${esc(o.orderNo)}</td><td>${esc(o.customer)}</td><td>${esc(o.mobile)}</td><td>${o.items.reduce((s,i)=>s+i.qty,0)}</td><td class="right">Rs. ${money(o.grand)}</td></tr>`).join("");
+  if(!rows)rows='<tr><td colspan="5">No orders today.</td></tr>';
+  const body=`<h1>HABIB NAVEED CONFECTIONERY CSP</h1><h2>Today Summary - ${esc(currentUser)}</h2>
+  <div class="meta"><b>Date:</b> ${todayKey()}</div>
+  <div class="meta"><b>Total Orders:</b> ${a.length}</div>
+  <div class="meta"><b>Total Items:</b> ${items}</div>
+  <div class="meta"><b>Customers:</b> ${customers}</div>
+  <div class="meta"><b>Total Sales:</b> Rs. ${money(sales)}</div>
+  <table><tr><th>Order No</th><th>Customer</th><th>Mobile</th><th>Items</th><th>Amount</th></tr>${rows}</table>
+  <div class="total">Today Sales: Rs. ${money(sales)}</div><div class="meta" style="text-align:center;margin-top:24px">Design by Rashid Javed • 0314-6775046</div>`;
+  printPDF("Today Summary",body);
+}
+function allOrdersPDF(){
+  const items=orders.reduce((s,o)=>s+o.items.reduce((x,i)=>x+i.qty,0),0);
+  const sales=orders.reduce((s,o)=>s+o.grand,0);
+  let rows=orders.map(o=>`<tr><td>${esc(o.orderNo)}</td><td>${esc(o.date)}</td><td>${esc(o.customer)}</td><td>${esc(o.mobile)}</td><td>${o.items.reduce((s,i)=>s+i.qty,0)}</td><td class="right">Rs. ${money(o.grand)}</td></tr>`).join("");
+  if(!rows)rows='<tr><td colspan="6">No saved orders.</td></tr>';
+  const body=`<h1>HABIB NAVEED CONFECTIONERY CSP</h1><h2>Orders Report - ${esc(currentUser)}</h2>
+  <div class="meta"><b>Booker/User:</b> ${esc(currentUser)}</div>
+  <div class="meta"><b>Total Orders:</b> ${orders.length}</div>
+  <div class="meta"><b>Total Items:</b> ${items}</div>
+  <div class="meta"><b>Total Sales:</b> Rs. ${money(sales)}</div>
+  <table><tr><th>Order No</th><th>Date</th><th>Customer</th><th>Mobile</th><th>Items</th><th>Amount</th></tr>${rows}</table>
+  <div class="total">Total Sales: Rs. ${money(sales)}</div><div class="meta" style="text-align:center;margin-top:24px">Design by Rashid Javed • 0314-6775046</div>`;
+  printPDF("My Orders Report",body);
+}
+
+if(currentUser && getUsers()[currentUser]){
+  openApp();
+}
+
+if("serviceWorker" in navigator){
+  window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
+}
+</script>
+</body>
+</html>

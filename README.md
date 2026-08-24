@@ -36,3 +36,9 @@ Agar mobile mein purani installed PWA/cache nazar aaye to app ko ek dafa close k
 - New Order mein Product Name ab Customer Search ki tarah searchable hai.
 - Jo product save hota hai woh next order mein Product search bar mein show hota hai.
 - Saved product select karne par us ka latest saved Rate automatically aa jata hai.
+
+### Forward SMS
+My Saved Orders mein Forward button customer name, order number, product name, Qty, Rate aur total amount ke sath SMS composer kholta hai. Target number: 03093609377.
+
+### Icon
+Simple white star icon. No yellow star and no HN text.

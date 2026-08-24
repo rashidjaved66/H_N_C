@@ -6,13 +6,13 @@
 <meta name="theme-color" content="#1f6feb">
 <meta name="mobile-web-app-title" content="Habib Naveed CSP">
 <meta name="application-name" content="Habib Naveed CSP">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="icon-192.png">
+
+
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Habib Naveed CSP">
-<meta name="app-version" content="2026.08.24.7">
+<meta name="app-version" content="2026.08.24.9">
 <script>
 /*
   APP UPDATE / FRESH LOGIN
@@ -20,7 +20,7 @@
   purani login/session + purana app data clear ho jayega.
   Is se updated app fresh login screen se start hogi.
 */
-const APP_VERSION = "2026.08.24.7";
+const APP_VERSION = "2026.08.24.9";
 (function(){
   try{
     const oldVersion = localStorage.getItem("HNC_APP_VERSION");
@@ -175,6 +175,8 @@ select{background:#fff}
 </style>
 <button id="installAppBtn" onclick="installPWA()">📲 Install App</button>
 
+<link rel="manifest" href="./manifest.webmanifest?v=20260824.9">
+<link rel="apple-touch-icon" href="./icon-192.png?v=20260824.9">
 </head>
 <body>
 
@@ -1092,6 +1094,36 @@ function printPDF(title,body){
   </div>
   <div id="summaryListContent"></div>
 </div>
+
+function focusCustomerNameField(){
+  setTimeout(()=>{
+    const el=document.getElementById("customerName") ||
+              document.getElementById("orderCustomer") ||
+              document.querySelector('input[name="customerName"]');
+    if(el){ el.focus(); el.select?.(); }
+  },120);
+}
+
+
+function forwardSavedOrderSMS(order){
+  try{
+    const target="03093609377";
+    const no=order.orderNo || order.number || order.id || "";
+    const customer=order.customerName || order.customer || order.name || "";
+    const items=Array.isArray(order.items) ? order.items : [];
+    const lines=[`Customer: ${customer}`,`Order: ${no}`];
+    items.forEach(x=>{
+      const product=x.product || x.name || "";
+      const qty=x.qty ?? x.quantity ?? "";
+      const rate=x.rate ?? "";
+      lines.push(`Product: ${product} | Qty: ${qty} | Rate: Rs. ${rate}`);
+    });
+    const amount=Number(order.total ?? order.amount ?? order.grandTotal ?? 0);
+    lines.push(`Total: Rs. ${amount}`);
+    window.location.href=`sms:${target}?body=${encodeURIComponent(lines.join("\\n"))}`;
+  }catch(e){ alert("SMS open nahi ho saka."); }
+}
+
 </body></html>`);
   w.document.close();
 }
@@ -1187,7 +1219,7 @@ function checkAppUpdate(){
 checkAppUpdate();
 
 if("serviceWorker" in navigator){
-  window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
+  window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js?v=20260824.9", {updateViaCache:"none"});
 }
 </script>
 </body>

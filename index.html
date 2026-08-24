@@ -4,14 +4,39 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <meta name="theme-color" content="#1f6feb">
-<link rel="manifest" href="manifest.json">
+<meta name="mobile-web-app-title" content="Habib Naveed CSP">
+<meta name="application-name" content="Habib Naveed CSP">
+<link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Habib Naveed CSP">
+<meta name="app-version" content="2026.08.24.2">
+<script>
+/*
+  APP UPDATE / FRESH LOGIN
+  Jab GitHub par naya index.html upload ho aur APP_VERSION change ho,
+  purani login/session + purana app data clear ho jayega.
+  Is se updated app fresh login screen se start hogi.
+*/
+const APP_VERSION = "2026.08.24.2";
+(function(){
+  try{
+    const oldVersion = localStorage.getItem("HNC_APP_VERSION");
+    if(oldVersion !== APP_VERSION){
+      // Purani app ki login/session state khatam.
+      sessionStorage.removeItem("orderBookerUser");
+      localStorage.removeItem("orderBookerUsers_v3");
+      localStorage.setItem("HNC_APP_VERSION", APP_VERSION);
+    }
+  }catch(e){}
+})();
+</script>
 <title>Habib Naveed Confectionery CSP - Order Booker v5 WhatsApp</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#eef3f8;font-family:Calibri,"Segoe UI",Arial,sans-serif;color:#222;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;min-height:100%;margin:0}body{margin:0;background:#eef3f8;font-family:Calibri,"Segoe UI",Arial,sans-serif;color:#222;-webkit-tap-highlight-color:transparent}
 button,input,select{touch-action:manipulation}
 .container{max-width:700px;margin:auto;padding:10px}
 .card{background:#fff;border-radius:18px;padding:14px;margin-bottom:12px;box-shadow:0 2px 12px #00000012}
@@ -25,13 +50,6 @@ button{min-height:44px}
 .container{max-width:700px;margin:auto;padding:14px}
 .header{background:#1f6feb;color:#fff;padding:18px;border-radius:16px;margin-bottom:14px}
 h1,h2{margin:0 0 12px}.header h1{font-size:24px}.header p{margin:0;opacity:.9}
- .headerLogo{width:125px;height:125px;border-radius:22px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:68px;box-shadow:0 4px 12px #0002;order:2}
-.header{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
-.header h1,.header p{flex:1 1 320px}
-.headerLogo{flex:0 0 105px}
-@media(max-width:480px){.headerLogo{width:88px;height:88px;flex-basis:88px;font-size:48px}.header h1{font-size:20px}}
-#orderProductInput{background:#fff}
-
 .card{background:#fff;border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 2px 10px #0001}
 .summary{display:grid;grid-template-columns:1fr 1fr;gap:10px}.stat{background:#f7f9fc;border-radius:12px;padding:14px}
 .stat b{display:block;font-size:22px;color:#1f6feb;margin-top:5px}
@@ -41,6 +59,7 @@ input,select{width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;fo
 .itemgrid{display:grid;grid-template-columns:1.5fr .7fr 1fr;gap:8px}
 button{border:0;border-radius:10px;padding:11px 13px;font-size:14px;font-weight:bold;cursor:pointer}
 .add{background:#e8f1ff;color:#1f6feb;width:100%;margin-top:6px}.save{background:#1f6feb;color:#fff;width:100%;margin-top:14px;font-size:17px}
+.save:disabled{background:#cfd6df;color:#68707a;cursor:not-allowed;box-shadow:none}
 .remove,.danger{background:#fee;color:#c00}.grand{text-align:right;font-size:21px;font-weight:bold;margin-top:14px;color:#1f6feb}
 .search{margin-bottom:10px}.order{border:1px solid #e1e4e8;border-radius:12px;padding:13px;margin-top:10px}
 .orderhead{display:flex;justify-content:space-between;gap:8px}.name{font-weight:bold;font-size:17px}.muted{font-size:13px;color:#666}
@@ -116,7 +135,7 @@ select{background:#fff}
 .todayItem{display:flex;justify-content:space-between;border-bottom:1px solid #eee;padding:6px 0;font-size:14px}
 .todayGrand{text-align:right;font-weight:bold;color:#1f6feb;margin-top:8px}
 
-.todayDetails{position:fixed;inset:0;z-index:9999;background:#fff;overflow-y:auto;padding:18px 14px 30px;margin:0;border:0;border-radius:0}
+.todayDetails{position:fixed;inset:0;z-index:9999;background:#fff;overflow-y:auto;padding:18px 14px 30px;-webkit-overflow-scrolling:touch;margin:0;border:0;border-radius:0}
 .todayDetailsHead{position:sticky;top:0;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:4px 0 12px;border-bottom:1px solid #eee;z-index:2}
 .todayDetailsHead h3{margin:0}
 .closeToday{background:#fee;color:#c00;border:0;border-radius:10px;padding:8px 12px;font-size:16px}
@@ -145,6 +164,17 @@ select{background:#fff}
   .orderEntryGrid>div:last-child{grid-column:1/-1}
 }
 </style>
+
+<style>
+#installAppBtn{
+  display:none;position:fixed;right:12px;bottom:12px;z-index:10001;
+  background:#1f6feb;color:#fff;border:0;border-radius:999px;
+  padding:12px 16px;font-weight:700;font-size:14px;
+  box-shadow:0 4px 16px #0003
+}
+</style>
+<button id="installAppBtn" onclick="installPWA()">📲 Install App</button>
+
 </head>
 <body>
 
@@ -188,16 +218,15 @@ select{background:#fff}
 </div>
 
 <div id="app" class="container hidden">
+  <div class="header">
+    <h1>🍰 Habib Naveed Confectionery CSP</h1>
+    <p>Order Booker • Multiple Items • Offline • Separate User Records</p>
+    <p class="designerCredit">Design by Rashid Javed • 0314-6775046</p>
+  </div>
+
   <div class="userbar">
     <div><b>👤 <span id="loggedUser"></span></b><div class="muted">📞 0303-9797145</div></div>
     <button class="logout" onclick="logout()">Logout</button>
-  </div>
-
-  <div class="header">
-    <div class="headerLogo" aria-label="App logo">🍰</div>
-    <h1>Habib Naveed Confectionery CSP</h1>
-    <p>Order Booker • Multiple Items • Offline • Separate User Records</p>
-    <p class="designerCredit">Design by Rashid Javed • 0314-6775046</p>
   </div>
 
   <div class="card">
@@ -240,15 +269,9 @@ select{background:#fff}
       <h2 style="margin-top:20px;margin-bottom:0">Order Items</h2>
       
     </div>
-    <div id="addItemPanel" class="productEntry">
-      <label>Category</label>
-      <input id="orderCategoryInput" list="orderCategoryList" placeholder="Type/select category..." oninput="categoryChanged()">
-      <datalist id="orderCategoryList"></datalist>
-
+    <div class="productEntry">
       <label>Product Name</label>
-      <input id="orderProductInput" list="orderProductList" placeholder="Type/search product name..." oninput="orderProductChanged()">
-      <datalist id="orderProductList"></datalist>
-      <select id="orderProduct" class="hidden" aria-hidden="true"></select>
+      <input id="orderProduct" placeholder="Product name" autocomplete="off">
 
       <div class="itemgrid orderEntryGrid">
         <div>
@@ -283,16 +306,27 @@ select{background:#fff}
   </div>
 
   <div class="card">
+    <div class="sectionHead">
+      <h2 style="margin:0">📄 Final Summary</h2>
+      <span class="pendingBadge" id="finalSummaryStatus">Pending Orders</span>
+    </div>
+    <div class="muted" id="finalSummaryMessage">All orders complete hone ke baad Final Summary PDF generate karein.</div>
+    <button class="save" id="finalSummaryBtn" onclick="finalSummaryPDF()" disabled>📄 Generate Final Summary PDF</button>
+  </div>
+
+  <div id="ledgerPanel" class="card hidden">
+    <div class="sectionHead"><h2>👤 Customer Ledger</h2><button class="closePanel" onclick="togglePanel('ledgerPanel', this)">✖ Close</button></div>
+    <input class="search" id="ledgerSearch" list="ledgerCustomerList"
+           placeholder="🔎 Search customer or mobile..." oninput="renderCustomerLedger()">
+    <datalist id="ledgerCustomerList"></datalist>
+    <div id="customerLedger"></div>
+    </div>
+  </div>
+
+  <div class="card">
     <h2>📋 My Saved Orders</h2>
     <input class="search" id="search" type="search" placeholder="🔎 Search customer, mobile or product..." oninput="renderOrders()">
     <div id="orders"></div>
-  </div>
-  <div id="summaryListOverlay" class="summaryListOverlay hidden">
-    <div class="summaryListTop">
-      <h2 id="summaryListTitle">Details</h2>
-      <button class="closeToday" onclick="closeSummaryList()">✖</button>
-    </div>
-    <div id="summaryListContent"></div>
   </div>
 </div>
 
@@ -306,10 +340,8 @@ const DEFAULT_USERS = {
 
 const USERS_KEY = "orderBookerUsers_v3";
 function loadUsers(){
-  try{
-    const saved=JSON.parse(localStorage.getItem(USERS_KEY)||"null");
-    return {...DEFAULT_USERS,...(saved||{})};
-  }catch(e){return {...DEFAULT_USERS};}
+  try{return JSON.parse(localStorage.getItem(USERS_KEY)||"null") || {...DEFAULT_USERS};}
+  catch(e){return {...DEFAULT_USERS};}
 }
 function saveUsers(users){
   localStorage.setItem(USERS_KEY, JSON.stringify(users));
@@ -325,14 +357,9 @@ let productCatalog={};
 function userKey(){ return "orderBookerPro_"+currentUser; }
 
 function loadUserData(){
-  try{orders=JSON.parse(localStorage.getItem(userKey())||"[]")||[];}catch(e){orders=[];}
-  try{productCatalog=JSON.parse(localStorage.getItem(userKey()+"_products")||"{}")||{};}catch(e){productCatalog={};}
-  products=Object.entries(productCatalog).map(([name,v])=>({
-    id:v?.id||name,
-    name,
-    category:String(v?.category||""),
-    rate:Number(v?.rate)||0
-  }));
+  orders=JSON.parse(localStorage.getItem(userKey())||"[]");
+  try{productCatalog=JSON.parse(localStorage.getItem(userKey()+"_products")||"{}")||{};}
+  catch(e){productCatalog={};}
 }
 function saveUserData(){
   localStorage.setItem(userKey(),JSON.stringify(orders));
@@ -405,8 +432,8 @@ function logout(){
 function openApp(){
   document.getElementById("loginScreen").classList.add("hidden");
   document.getElementById("app").classList.remove("hidden");
-  const user=getUsers()[currentUser] || DEFAULT_USERS.admin;
-  document.getElementById("loggedUser").textContent=(user.name||currentUser)+" ("+currentUser+")";
+  window.scrollTo(0,0);
+  document.getElementById("loggedUser").textContent=getUsers()[currentUser].name+" ("+currentUser+")";
   loadUserData();
   items=[];
   renderItems();
@@ -414,9 +441,11 @@ function openApp(){
   renderPendingOrders();
   updateSummary();
   renderCustomerList();
-  renderCategorySelect();
   renderProductList();
+  renderCustomerLedgerList();
+  renderCustomerLedger();
   updateNewProductTotal();
+  updateFinalSummaryButton();
 }
 
 function getCustomers(){
@@ -439,44 +468,108 @@ function renderCustomerList(){
 }
 
 function renderProductList(){
-  const list=document.getElementById("orderProductList");
-  if(!list)return;
-  const cat=(document.getElementById("orderCategoryInput")?.value||"").trim().toLowerCase();
-  const filtered=products.filter(p=>!cat || String(p.category||"").toLowerCase()===cat)
-    .sort((a,b)=>String(a.name).localeCompare(String(b.name)));
-  list.innerHTML=filtered.map(p=>`<option value="${esc(p.name)}"></option>`).join("");
+  // Product Register removed. Products are entered directly with each order.
 }
+
 function renderCategorySelect(){
-  const list=document.getElementById("orderCategoryList");
-  if(!list)return;
-  const cats=[...new Set(products.map(p=>String(p.category||"").trim()).filter(Boolean))].sort();
-  list.innerHTML=cats.map(c=>`<option value="${esc(c)}"></option>`).join("");
+  // Category Register removed.
 }
+
+function renderCategoryList(){
+  // Category Register removed.
+}
+
 function categoryChanged(){
-  renderProductList();
-  const product=document.getElementById("orderProductInput");
-  if(product) product.value="";
-  const rate=document.getElementById("newRate");
-  if(rate) rate.value="";
-  const total=document.getElementById("newTotal");
-  if(total) total.value="Rs. 0.00";
+  // Category selection removed.
 }
+
 function orderProductChanged(){
-  const input=document.getElementById("orderProductInput");
-  const name=(input?.value||"").trim().toLowerCase();
-  const cat=(document.getElementById("orderCategoryInput")?.value||"").trim().toLowerCase();
-  const p=products.find(x=>String(x.name||"").toLowerCase()===name &&
-    (!cat || String(x.category||"").toLowerCase()===cat));
-  if(p){
-    document.getElementById("newRate").value=p.rate;
-    updateNewProductTotal();
+  updateNewProductTotal();
+}
+
+function registerProduct(){
+  // Product Register removed.
+}
+
+function customerSelected(){
+  const q=document.getElementById("customerSearch").value.trim().toLowerCase();
+  const c=getCustomers().find(x=>x.mobile.toLowerCase()===q || x.name.toLowerCase()===q);
+  if(c){
+    document.getElementById("customer").value=c.name;
+    document.getElementById("mobile").value=c.mobile;
+    const latest=orders.filter(o=>(o.mobile||"")===c.mobile).sort((a,b)=>b.id-a.id)[0];
+    document.getElementById("address").value=latest?.address||"";
+    document.getElementById("customerHistory").textContent=
+      "Previous orders: "+c.orders+" • Previous sales: Rs. "+money(c.sales);
+  }
+}
+function newCustomer(){
+  document.getElementById("customerSearch").value="";
+  document.getElementById("customer").value="";
+  document.getElementById("mobile").value="";
+  document.getElementById("address").value="";
+  document.getElementById("customerHistory").textContent="New customer";
+  document.getElementById("customer").focus();
+}
+
+
+
+function togglePanel(id, btn){
+  const panel=document.getElementById(id);
+  if(!panel)return;
+  const hidden=panel.classList.toggle("hidden");
+  const span=btn.querySelector("span");
+  if(span)span.textContent=hidden?"＋":"−";
+  if(!hidden && id==="addItemPanel"){
+    setTimeout(()=>document.getElementById("registerProduct").focus(),120);
   }
 }
 
+function focusNewItem(){
+  const box=document.querySelector(".productEntry");
+  if(box) box.scrollIntoView({behavior:"smooth",block:"center"});
+  setTimeout(()=>document.getElementById("newProduct").focus(),250);
+}
+
+function updateNewProductTotal(){
+  const q=Number(document.getElementById("newQty").value)||0;
+  const r=Number(document.getElementById("newRate").value)||0;
+  document.getElementById("newTotal").value="Rs. "+money(q*r);
+}
+
+function addProductFromBox(){
+  const product=document.getElementById("orderProduct").value.trim();
+  const qty=Number(document.getElementById("newQty").value);
+  const rate=Number(document.getElementById("newRate").value);
+
+  if(!product){alert("Product name enter karein.");return}
+  if(qty<=0 || !Number.isFinite(qty)){alert("Qty sahi enter karein.");return}
+  if(rate<0 || !Number.isFinite(rate)){alert("Rate sahi enter karein.");return}
+
+  // Whatever product is typed here is saved directly in the order.
+  items.push({
+    id:Date.now()+Math.random(),
+    product,
+    qty,
+    rate
+  });
+
+  renderItems();
+
+  document.getElementById("orderProduct").value="";
+  document.getElementById("newQty").value=1;
+  document.getElementById("newRate").value="";
+  document.getElementById("newTotal").value="Rs. 0.00";
+}
+
+function addItem(product="",qty=1,rate=""){
+  items.push({id:Date.now()+Math.random(),product,qty,rate});
+  renderItems();
+}
 function renderItems(){
   document.getElementById("items").innerHTML=items.map((x,i)=>`
   <div class="item">
-    <label>Product ${i+1} ${x.category?`• ${esc(x.category)}`:""}</label>
+    <label>Product ${i+1}</label>
     <input value="${esc(x.product)}" placeholder="Product name" oninput="items[${i}].product=this.value">
     <div class="itemgrid">
       <div><label>Qty</label><input type="number" min="1" value="${x.qty}" oninput="items[${i}].qty=this.value;updateTotals()"></div>
@@ -518,8 +611,7 @@ function saveOrder(){
     const qty=Number(x.qty);
     const rate=Number(x.rate);
     const total=qty*rate;
-    productCatalog[String(x.product).trim()]={rate:rate,updatedAt:Date.now()};
-    return {product:String(x.product).trim(),category:String(x.category||"").trim(),qty,rate,total};
+    return {product:String(x.product).trim(),qty,rate,total};
   });
 
   const grand=clean.reduce((sum,x)=>sum+Number(x.total),0);
@@ -562,9 +654,11 @@ function saveOrder(){
   renderOrders();
   updateSummary();
   renderCustomerList();
+  renderCategoryList();
   renderCategorySelect();
   renderProductList();
   updateNewProductTotal();
+  updateFinalSummaryButton();
 
   alert("Order saved successfully ✅\n\nAmount: Rs. "+money(grand)+"\nOrder No: "+order.orderNo+"\n\nWhatsApp message tayyar hai.");
   window.open(waUrl,"_blank");
@@ -587,7 +681,7 @@ function renderPendingOrders(){
     <div class="pendingOrder">
       <div class="pendingTitle">${esc(o.orderNo)} — ${esc(o.customer)}</div>
       <div class="pendingMeta">📱 ${esc(o.mobile)} • 📍 ${esc(o.address||"No address")} • ${esc(o.date)}</div>
-      ${o.items.map(x=>`<div class="row"><span>${x.category?`[${esc(x.category)}] `:""}${esc(x.product)} × ${x.qty}</span><b>Rs. ${money(x.total)}</b></div>`).join("")}
+      ${o.items.map(x=>`<div class="row"><span>${esc(x.product)} × ${x.qty}</span><b>Rs. ${money(x.total)}</b></div>`).join("")}
       <div class="grand">Rs. ${money(o.grand)}</div>
       <button class="completeBtn" onclick="completeOrder(${o.id})">✅ Order Complete</button>
     </div>`).join("");
@@ -607,7 +701,7 @@ function completeOrder(id){
 function deleteOrder(id){
   if(!confirm("Delete this complete order?"))return;
   orders=orders.filter(o=>o.id!==id);
-  saveUserData();renderOrders();renderPendingOrders();updateSummary();renderCustomerList();renderProductList();renderCustomerLedgerList();renderCustomerLedger();
+  saveUserData();renderOrders();renderPendingOrders();updateSummary();renderCustomerList();renderProductList();renderCustomerLedgerList();renderCustomerLedger();updateFinalSummaryButton();
 }
 
 function renderCustomerLedgerList(){
@@ -667,9 +761,9 @@ function renderCustomerLedger(){
 function renderOrders(){
   const q=document.getElementById("search").value.toLowerCase().trim();
   const list=orders.filter(o=>
-    String(o.customer||"").toLowerCase().includes(q)||
-    String(o.mobile||"").toLowerCase().includes(q)||
-    (o.items||[]).some(x=>String(x.product||"").toLowerCase().includes(q))
+    o.customer.toLowerCase().includes(q)||
+    o.mobile.toLowerCase().includes(q)||
+    o.items.some(x=>x.product.toLowerCase().includes(q))
   );
   const box=document.getElementById("orders");
   if(!list.length){box.innerHTML='<div class="empty">No orders found.</div>';return}
@@ -679,7 +773,7 @@ function renderOrders(){
       <div><div class="name">${esc(o.customer)}</div><div class="muted">${esc(o.orderNo)} • 📱 ${esc(o.mobile)} • 📍 ${esc(o.address||"No address")}</div></div>
       <button class="danger" onclick="deleteOrder(${o.id})">Delete</button>
     </div>
-    ${o.items.map(x=>`<div class="row"><span>${x.category?`[${esc(x.category)}] `:""}${esc(x.product)} × ${x.qty}</span><b>Rs. ${money(x.total)}</b></div>`).join("")}
+    ${o.items.map(x=>`<div class="row"><span>${esc(x.product)} × ${x.qty}</span><b>Rs. ${money(x.total)}</b></div>`).join("")}
     <div class="grand">Grand Total: Rs. ${money(o.grand)}</div>
     <div class="muted">🕒 ${esc(o.date)} • 👤 ${esc(o.bookedBy||currentUser)} • ${o.status==="completed"?"✅ Completed":"⏳ Pending"}</div>
     <button class="pdf" style="margin-top:10px;width:100%" onclick="singleOrderPDF(${o.id})">📄 Generate Order PDF</button>
@@ -720,7 +814,7 @@ function openSummaryList(type){
     const rows=Object.values(map).sort((x,y)=>x.product.localeCompare(y.product));
     box.innerHTML=rows.length ? rows.map(x=>`
       <div class="summaryListRow">
-        <b>${x.category?`[${esc(x.category)}] `:""}${esc(x.product)}</b>
+        <b>${esc(x.product)}</b>
         <div class="summaryListMeta">Total Qty: ${x.qty} • Amount: Rs. ${money(x.amount)}</div>
       </div>`).join("") : '<div class="empty">Aaj koi item nahi.</div>';
   }
@@ -776,7 +870,7 @@ function showSummaryOrder(id){
     <div class="summaryDetailCard">
       <h3>Items</h3>
       ${o.items.map(x=>`<div class="summaryDetailLine">
-        <span>${x.category?`[${esc(x.category)}] `:""}${esc(x.product)} × ${x.qty}</span>
+        <span>${esc(x.product)} × ${x.qty}</span>
         <span>Rs. ${money(x.total)}</span>
       </div>`).join("")}
     </div>`;
@@ -811,7 +905,7 @@ function renderTodayDetails(){
         <div><b>${esc(o.orderNo)}</b><div class="muted">${esc(o.customer)} • 📱 ${esc(o.mobile)}</div><div class="muted">📍 ${esc(o.address||"No address")}</div></div>
         <b>Rs. ${money(o.grand)}</b>
       </div>
-      ${o.items.map(x=>`<div class="todayItem"><span>${x.category?`[${esc(x.category)}] `:""}${esc(x.product)} × ${x.qty} @ Rs. ${money(x.rate)}</span><b>Rs. ${money(x.total)}</b></div>`).join("")}
+      ${o.items.map(x=>`<div class="todayItem"><span>${esc(x.product)} × ${x.qty} @ Rs. ${money(x.rate)}</span><b>Rs. ${money(x.total)}</b></div>`).join("")}
       <div class="todayGrand">${o.status==="completed"?"✅ Completed":"⏳ Pending"} • Rs. ${money(o.grand)}</div>
     </div>`).join("");
 }
@@ -829,54 +923,75 @@ function updateSummary(){
   if(panel && !panel.classList.contains("hidden")) renderTodayDetails();
 }
 
-
-function printTodayCategoryPDF(){
-  const today=new Date().toISOString().slice(0,10);
-  const todays=(orders||[]).filter(o=>String(o.date||"").slice(0,10)===today);
-  const grouped={};
-  todays.forEach(o=>{
-    (o.items||[]).forEach(it=>{
-      const cat=String(it.category||"Uncategorized").trim()||"Uncategorized";
-      const product=String(it.product||"").trim();
-      const qty=Number(it.qty)||0;
-      const amount=(Number(it.rate)||0)*qty;
-      if(!grouped[cat]) grouped[cat]={};
-      if(!grouped[cat][product]) grouped[cat][product]={qty:0,amount:0};
-      grouped[cat][product].qty+=qty;
-      grouped[cat][product].amount+=amount;
-    });
-  });
-  const cats=Object.keys(grouped).sort((a,b)=>a.localeCompare(b));
-  if(!cats.length){alert("Aaj ke orders mein koi product nahi mila.");return}
-  let grandQty=0,grandAmount=0;
-  let html=`<html><head><title>Today Category Wise Product Report</title>
-  <style>
-  body{font-family:Arial,sans-serif;padding:28px;color:#222}
-  h1{text-align:center;margin:0 0 5px}.date{text-align:center;margin-bottom:24px}
-  h2{margin:22px 0 8px;border-bottom:1px solid #999;padding-bottom:6px}
-  table{width:100%;border-collapse:collapse;margin-bottom:8px}
-  th,td{border:1px solid #bbb;padding:8px;text-align:left}
-  th:nth-child(2),td:nth-child(2),th:nth-child(3),td:nth-child(3){text-align:right}
-  .total{font-weight:bold;text-align:right}
-  .grand{font-size:18px;font-weight:bold;border-top:2px solid #222;padding-top:12px;margin-top:18px}
-  </style></head><body>
-  <h1>📦 Category Wise Product Report</h1>
-  <div class="date">Today: ${today}</div>`;
-  cats.forEach(cat=>{
-    html+=`<h2>${esc(cat)}</h2><table><tr><th>Product</th><th>Qty</th><th>Amount</th></tr>`;
-    let catQty=0,catAmount=0;
-    Object.keys(grouped[cat]).sort((a,b)=>a.localeCompare(b)).forEach(product=>{
-      const x=grouped[cat][product];
-      catQty+=x.qty;catAmount+=x.amount;grandQty+=x.qty;grandAmount+=x.amount;
-      html+=`<tr><td>${esc(product)}</td><td>${x.qty}</td><td>Rs. ${money(x.amount)}</td></tr>`;
-    });
-    html+=`<tr><td class="total">Category Total</td><td>${catQty}</td><td>Rs. ${money(catAmount)}</td></tr></table>`;
-  });
-  html+=`<div class="grand">Grand Total — Qty: ${grandQty} &nbsp;&nbsp; Amount: Rs. ${money(grandAmount)}</div>
-  <script>window.onload=()=>window.print()<\/script></body></html>`;
-  const w=window.open("","_blank");
-  if(w){w.document.write(html);w.document.close();}
+function allOrdersCompleted(){
+  return orders.length>0 && orders.every(o=>(o.status||"pending")==="completed");
 }
+
+function updateFinalSummaryButton(){
+  const btn=document.getElementById("finalSummaryBtn");
+  const status=document.getElementById("finalSummaryStatus");
+  const msg=document.getElementById("finalSummaryMessage");
+  if(!btn || !status || !msg)return;
+
+  if(!orders.length){
+    btn.disabled=true;
+    status.textContent="No Orders";
+    msg.textContent="Pehle order save karein.";
+    return;
+  }
+
+  if(allOrdersCompleted()){
+    btn.disabled=false;
+    status.textContent="All Complete";
+    msg.textContent="Sab orders complete ho gaye hain. Final Summary PDF ready hai.";
+  }else{
+    btn.disabled=true;
+    const pending=getPendingOrders().length;
+    status.textContent=pending+" Pending";
+    msg.textContent="Final Summary PDF ke liye tamam orders complete karein.";
+  }
+}
+
+function finalSummaryPDF(){
+  if(!allOrdersCompleted()){
+    alert("Final Summary PDF banane se pehle tamam orders complete karein.");
+    return;
+  }
+
+  const items=orders.reduce((s,o)=>s+o.items.reduce((x,i)=>x+Number(i.qty||0),0),0);
+  const sales=orders.reduce((s,o)=>s+Number(o.grand||0),0);
+  const customers=new Set(orders.map(o=>o.mobile||o.customer)).size;
+
+  let rows=orders.map(o=>`
+    <tr>
+      <td>${esc(o.orderNo)}</td>
+      <td>${esc(o.date)}</td>
+      <td>${esc(o.customer)}</td>
+      <td>${esc(o.mobile)}</td>
+      <td>Completed</td>
+      <td>${o.items.reduce((s,i)=>s+Number(i.qty||0),0)}</td>
+      <td class="right">Rs. ${money(o.grand)}</td>
+    </tr>`).join("");
+
+  const body=`<h1>HABIB NAVEED CONFECTIONERY CSP</h1>
+  <h2>Final Summary Report</h2>
+  <div class="meta"><b>User:</b> ${esc(currentUser)}</div>
+  <div class="meta"><b>Date:</b> ${todayKey()}</div>
+  <div class="meta"><b>Total Orders:</b> ${orders.length}</div>
+  <div class="meta"><b>Total Items:</b> ${items}</div>
+  <div class="meta"><b>Total Customers:</b> ${customers}</div>
+  <div class="meta"><b>Total Sales:</b> Rs. ${money(sales)}</div>
+  <table>
+    <tr><th>Order No</th><th>Date</th><th>Customer</th><th>Mobile</th><th>Status</th><th>Items</th><th>Amount</th></tr>
+    ${rows}
+  </table>
+  <div class="total">Final Total Sales: Rs. ${money(sales)}</div>
+  <div class="meta" style="text-align:center;margin-top:24px">All orders completed successfully.</div>
+  <div class="meta" style="text-align:center;margin-top:10px">Design by Rashid Javed • 0314-6775046</div>`;
+
+  printPDF("Final Summary",body);
+}
+
 function printPDF(title,body){
   const w=window.open("","_blank");
   if(!w){alert("Popup blocked. Please allow popups for this file.");return}
@@ -887,8 +1002,26 @@ function printPDF(title,body){
   th,td{border:1px solid #bbb;padding:8px;text-align:left}th{background:#eee}
   .right{text-align:right}.total{font-size:20px;font-weight:bold;text-align:right;margin-top:15px}
   .meta{margin:4px 0;color:#444}@media print{button{display:none}}
-  </style></head><body>${body}
+  </style>
+<style>
+#installAppBtn{
+  display:none;position:fixed;right:12px;bottom:12px;z-index:10001;
+  background:#1f6feb;color:#fff;border:0;border-radius:999px;
+  padding:12px 16px;font-weight:700;font-size:14px;
+  box-shadow:0 4px 16px #0003
+}
+</style>
+<button id="installAppBtn" onclick="installPWA()">📲 Install App</button>
+
+</head><body>${body}
   <script>window.onload=function(){setTimeout(function(){window.print()},300)}<\/script>
+<div id="summaryListOverlay" class="summaryListOverlay hidden">
+  <div class="summaryListTop">
+    <h2 id="summaryListTitle">Details</h2>
+    <button class="closeToday" onclick="closeSummaryList()">✖</button>
+  </div>
+  <div id="summaryListContent"></div>
+</div>
 </body></html>`);
   w.document.close();
 }
@@ -940,6 +1073,48 @@ function allOrdersPDF(){
 if(currentUser && getUsers()[currentUser]){
   openApp();
 }
+
+
+let deferredInstallPrompt=null;
+
+window.addEventListener("beforeinstallprompt", e=>{
+  e.preventDefault();
+  deferredInstallPrompt=e;
+  const btn=document.getElementById("installAppBtn");
+  if(btn) btn.style.display="block";
+});
+
+async function installPWA(){
+  if(!deferredInstallPrompt){
+    alert("Browser menu (⋮) open karein aur 'Add to Home screen' ya 'Install app' select karein.");
+    return;
+  }
+  deferredInstallPrompt.prompt();
+  try{await deferredInstallPrompt.userChoice;}catch(e){}
+  deferredInstallPrompt=null;
+  const btn=document.getElementById("installAppBtn");
+  if(btn) btn.style.display="none";
+}
+
+window.addEventListener("appinstalled",()=>{
+  const btn=document.getElementById("installAppBtn");
+  if(btn) btn.style.display="none";
+});
+
+
+function checkAppUpdate(){
+  try{
+    const v = document.querySelector('meta[name="app-version"]')?.content || "";
+    const saved = localStorage.getItem("HNC_APP_VERSION") || "";
+    if(v && saved !== v){
+      sessionStorage.removeItem("orderBookerUser");
+      localStorage.setItem("HNC_APP_VERSION", v);
+      // Fresh login: do not restore the previous user.
+      currentUser = "";
+    }
+  }catch(e){}
+}
+checkAppUpdate();
 
 if("serviceWorker" in navigator){
   window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));

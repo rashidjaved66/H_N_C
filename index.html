@@ -12,7 +12,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Habib Naveed CSP">
-<meta name="app-version" content="2026.08.24.2">
+<meta name="app-version" content="2026.08.24.3">
 <script>
 /*
   APP UPDATE / FRESH LOGIN
@@ -20,7 +20,7 @@
   purani login/session + purana app data clear ho jayega.
   Is se updated app fresh login screen se start hogi.
 */
-const APP_VERSION = "2026.08.24.2";
+const APP_VERSION = "2026.08.24.3";
 (function(){
   try{
     const oldVersion = localStorage.getItem("HNC_APP_VERSION");
@@ -229,6 +229,10 @@ select{background:#fff}
     <button class="logout" onclick="logout()">Logout</button>
   </div>
 
+  <div class="card" id="newOrderLauncher">
+    <button class="save" onclick="openNewOrder()">➕ New Order</button>
+  </div>
+
   <div class="card">
     <button class="summaryHeader" onclick="toggleTodaySummary()">📊 Today Summary <span id="summaryDots">•••</span></button>
     <div class="summary">
@@ -248,8 +252,8 @@ select{background:#fff}
     </div>
   </div>
 
-  <div class="card">
-    <h2>➕ New Order</h2>
+  <div class="card hidden" id="newOrderPanel">
+    <div class="sectionHead"><h2>➕ New Order</h2><button class="closePanel" onclick="showDashboard()">✖ Dashboard</button></div>
     <label>Customer</label>
     <input id="customerSearch" list="customerList" placeholder="Search/select previous customer..." oninput="customerSelected()">
     <datalist id="customerList"></datalist>
@@ -271,7 +275,8 @@ select{background:#fff}
     </div>
     <div class="productEntry">
       <label>Product Name</label>
-      <input id="orderProduct" placeholder="Product name" autocomplete="off">
+      <input id="orderProduct" list="productList" placeholder="Search/select previous product..." autocomplete="off" oninput="orderProductChanged()">
+      <datalist id="productList"></datalist>
 
       <div class="itemgrid orderEntryGrid">
         <div>
@@ -446,6 +451,7 @@ function openApp(){
   renderCustomerLedger();
   updateNewProductTotal();
   updateFinalSummaryButton();
+  showDashboard();
 }
 
 function getCustomers(){
@@ -467,8 +473,39 @@ function renderCustomerList(){
   list.innerHTML=getCustomers().map(c=>`<option value="${esc(c.mobile)}">${esc(c.name)} — ${esc(c.mobile)}</option>`).join("");
 }
 
+function getProducts(){
+  const map={};
+
+  // Products saved in the product catalog.
+  Object.values(productCatalog||{}).forEach(p=>{
+    if(!p)return;
+    const name=String(p.name||p.product||"").trim();
+    if(!name)return;
+    const key=name.toLowerCase();
+    map[key]={name,rate:Number(p.rate)||0};
+  });
+
+  // Also build the list from all saved orders, so old orders automatically
+  // become searchable products.
+  orders.forEach(o=>{
+    (o.items||[]).forEach(x=>{
+      const name=String(x.product||"").trim();
+      if(!name)return;
+      const key=name.toLowerCase();
+      if(!map[key]) map[key]={name,rate:Number(x.rate)||0};
+      else if(Number(x.rate)>=0) map[key].rate=Number(x.rate)||0;
+    });
+  });
+
+  return Object.values(map).sort((a,b)=>a.name.localeCompare(b.name));
+}
+
 function renderProductList(){
-  // Product Register removed. Products are entered directly with each order.
+  const list=document.getElementById("productList");
+  if(!list)return;
+  list.innerHTML=getProducts().map(p=>
+    `<option value="${esc(p.name)}">${esc(p.name)} — Rs. ${money(p.rate)}</option>`
+  ).join("");
 }
 
 function renderCategorySelect(){
@@ -484,6 +521,12 @@ function categoryChanged(){
 }
 
 function orderProductChanged(){
+  const input=document.getElementById("orderProduct");
+  const q=(input?.value||"").trim().toLowerCase();
+  const p=getProducts().find(x=>x.name.toLowerCase()===q);
+  if(p){
+    document.getElementById("newRate").value=Number(p.rate)||0;
+  }
   updateNewProductTotal();
 }
 
@@ -513,6 +556,19 @@ function newCustomer(){
 }
 
 
+
+function showDashboard(){
+  document.getElementById("newOrderPanel")?.classList.add("hidden");
+  document.getElementById("newOrderLauncher")?.classList.remove("hidden");
+  window.scrollTo(0,0);
+}
+
+function openNewOrder(){
+  document.getElementById("newOrderLauncher")?.classList.add("hidden");
+  document.getElementById("newOrderPanel")?.classList.remove("hidden");
+  window.scrollTo(0,0);
+  setTimeout(()=>document.getElementById("customer")?.focus(),120);
+}
 
 function togglePanel(id, btn){
   const panel=document.getElementById(id);
@@ -546,7 +602,12 @@ function addProductFromBox(){
   if(qty<=0 || !Number.isFinite(qty)){alert("Qty sahi enter karein.");return}
   if(rate<0 || !Number.isFinite(rate)){alert("Rate sahi enter karein.");return}
 
-  // Whatever product is typed here is saved directly in the order.
+  // Product ko customer ki tarah permanently save karo, taake
+  // next order mein Product search bar mein show ho.
+  const productKey=product.toLowerCase();
+  productCatalog[productKey]={name:product,rate};
+  saveUserData();
+
   items.push({
     id:Date.now()+Math.random(),
     product,
@@ -554,6 +615,7 @@ function addProductFromBox(){
     rate
   });
 
+  renderProductList();
   renderItems();
 
   document.getElementById("orderProduct").value="";
@@ -616,6 +678,12 @@ function saveOrder(){
 
   const grand=clean.reduce((sum,x)=>sum+Number(x.total),0);
 
+  // Har order ke products ko catalog mein save/update karo.
+  clean.forEach(x=>{
+    const key=x.product.toLowerCase();
+    productCatalog[key]={name:x.product,rate:Number(x.rate)||0};
+  });
+
   const order={
     id:Date.now(),
     orderNo:"ORD-"+String(Date.now()).slice(-6),
@@ -654,6 +722,7 @@ function saveOrder(){
   renderOrders();
   updateSummary();
   renderCustomerList();
+  renderProductList();
   renderCategoryList();
   renderCategorySelect();
   renderProductList();
@@ -662,6 +731,7 @@ function saveOrder(){
 
   alert("Order saved successfully ✅\n\nAmount: Rs. "+money(grand)+"\nOrder No: "+order.orderNo+"\n\nWhatsApp message tayyar hai.");
   window.open(waUrl,"_blank");
+  showDashboard();
 }
 
 function getPendingOrders(){

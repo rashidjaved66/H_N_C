@@ -200,22 +200,6 @@ select{background:#fff}
 }
 </style>
 
-
-<style id="pdf-print-safe-margin">
-@page {
-  margin: 0.15in !important;
-}
-@media print {
-  html, body {
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-  body * {
-    box-sizing: border-box;
-  }
-}
-</style>
-
 </head>
 <body>
 <div id="loginScreen" class="loginWrap">
@@ -1555,26 +1539,6 @@ function printPDF(title,body){
 </div>
 
 
-
-
-<script id="mobile-pdf-save-helper">
-function saveTodayAllPDFMobile(){
-  // Use the app's existing PDF function if it exists.
-  const candidates = [
-    "saveTodayAllPDF",
-    "printTodayAllPDF",
-    "downloadTodayAllPDF"
-  ];
-  for(const name of candidates){
-    if(typeof window[name] === "function"){
-      try { window[name](); return; } catch(e) {}
-    }
-  }
-  // Fallback: native browser print flow. The @page rule above keeps
-  // all four print margins at 0.15 inch.
-  window.print();
-}
-</script>
 
 </body></html>`);
   w.document.close();

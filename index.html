@@ -6,13 +6,13 @@
 <meta name="theme-color" content="#1f6feb">
 <meta name="mobile-web-app-title" content="Habib Naveed CSP">
 <meta name="application-name" content="Habib Naveed CSP">
-<link rel="manifest" href="manifest.webmanifest?v=20260828.1">
+<link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Habib Naveed CSP">
-<meta name="app-version" content="2026.08.28.1">
+<meta name="app-version" content="2026.08.24.3">
 <script>
 /*
   APP UPDATE / FRESH LOGIN
@@ -20,7 +20,7 @@
   purani login/session + purana app data clear ho jayega.
   Is se updated app fresh login screen se start hogi.
 */
-const APP_VERSION = "2026.08.28.1";
+const APP_VERSION = "2026.08.24.3";
 (function(){
   try{
     const oldVersion = localStorage.getItem("HNC_APP_VERSION");
@@ -174,6 +174,31 @@ select{background:#fff}
 }
 </style>
 <button id="installAppBtn" onclick="installPWA()">📲 Install App</button>
+
+
+<style id="hnc-today-all-print-area">
+@page{size:3.2in 8.4in;margin:0;}
+@media print{
+  html,body{margin:0!important;padding:0!important;width:3.2in!important;}
+  .receipt{
+    box-sizing:border-box!important;
+    width:3in!important;
+    max-width:3in!important;
+    height:8in!important;
+    min-height:8in!important;
+    margin:0.2in auto!important;
+    padding:0!important;
+    overflow:hidden!important;
+  }
+  .receiptTable{width:3in!important;max-width:3in!important;table-layout:fixed!important;}
+  .receiptTable th,.receiptTable td{box-sizing:border-box!important;overflow:hidden!important;}
+  .receiptTable .desc{width:45%!important;}
+  .receiptTable th:nth-child(2),.receiptTable td:nth-child(2){width:14%!important;}
+  .receiptTable th:nth-child(3),.receiptTable td:nth-child(3){width:18%!important;text-align:right!important;}
+  .receiptTable th:nth-child(4),.receiptTable td:nth-child(4){width:23%!important;text-align:right!important;white-space:nowrap!important;}
+  .right{white-space:nowrap!important;text-align:right!important;}
+}
+</style>
 
 </head>
 <body>
@@ -1454,10 +1479,9 @@ function printPDF(title,body){
   if(!w){alert("Popup blocked. Please allow popups for this file.");return}
   w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${esc(title)}</title>
   <style>
-  /* Exact invoice/PDF paper: 3.2 x 8.4 inches = 81.28 x 213.36 mm */
-  @page{size:81.28mm 213.36mm;margin:0}
-  html,body{width:81.28mm;height:213.36mm;min-height:213.36mm;margin:0;padding:0}
-  body{font-family:Calibri,"Segoe UI",Arial,sans-serif;width:81.28mm;height:213.36mm;min-height:213.36mm;margin:0;padding:4.5mm 2.5mm 3.5mm;color:#111;font-size:10px;overflow:hidden}
+  @page{size:3.2in 8.4in;margin:0}
+  html,body{width:3.2in;min-height:8.4in}
+  body{font-family:Calibri,"Segoe UI",Arial,sans-serif;width:3.2in;min-height:8.4in;margin:0;padding:0.12in;color:#111;font-size:10px}
   h1{font-size:14px;text-align:center;margin:0 0 3px}
   h2{font-size:12px;margin:5px 0}
   table{width:100%;border-collapse:collapse;margin-top:5px;font-size:9px}
@@ -1465,8 +1489,8 @@ function printPDF(title,body){
   .right{text-align:right}.total{font-size:13px;font-weight:bold;text-align:right;margin-top:7px}
   .meta{margin:2px 0;color:#222;font-size:9px}
   .printNow{width:100%;background:#1f6feb;color:#fff;border:0;border-radius:6px;padding:7px;margin-bottom:8px;font-weight:bold}
-  @media print{button{display:none!important}html,body{width:81.28mm!important;height:213.36mm!important;min-height:213.36mm!important;margin:0!important;padding:0!important}body{padding:3.05mm!important;overflow:hidden!important}}
-  .pageBreak{page-break-after:always;break-after:page;break-inside:avoid;}
+  @media print{button{display:none!important}body{margin:0;padding:0.12in}}
+  .pageBreak{page-break-after:always;break-after:page;}
   .ledgerCustomer{border:1px solid #bbb;border-radius:8px;padding:10px;margin-top:10px}
   .ledgerName{font-size:15px;font-weight:bold}
   .ledgerSummary{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin:8px 0}

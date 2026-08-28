@@ -1,0 +1,8 @@
+Star HNC PWA icons: OK
+Today All Print PDF page size 3.2 x 8.4 inch: OK
+Today All Print / Save PDF flow: OK
+Customer Ledger separate view: OK
+Pending Orders + Final Summary combined view: OK
+Reset All password 674750: OK
+PWA manifest/service worker: OK
+WhatsApp Today Print button removed: OK

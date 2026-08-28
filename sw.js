@@ -1,20 +1,23 @@
-const CACHE_NAME="hnc-csp-v202608249";
-const CORE=["./index.html","./manifest.webmanifest","./icon-192.png","./icon-512.png"];
-self.addEventListener("install",event=>{
-  event.waitUntil(caches.open(CACHE_NAME).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting()));
+const CACHE = 'hnc-app-2026.08.28.1';
+const APP_SHELL = ['./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
+self.addEventListener('install', event => {
+  event.waitUntil(caches.open(CACHE).then(c => c.addAll(APP_SHELL)).then(() => self.skipWaiting()));
 });
-self.addEventListener("activate",event=>{
-  event.waitUntil(caches.keys().then(keys=>Promise.all(
-    keys.filter(k=>k!==CACHE_NAME).map(k=>caches.delete(k))
-  )).then(()=>self.clients.claim()));
+self.addEventListener('activate', event => {
+  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim()));
 });
-self.addEventListener("fetch",event=>{
-  const u=new URL(event.request.url);
-  if(u.pathname.endsWith("/index.html") || u.pathname.endsWith("/")){
-    event.respondWith(fetch(event.request,{cache:"no-store"}).then(r=>{
-      const c=r.clone(); caches.open(CACHE_NAME).then(x=>x.put("./index.html",c)); return r;
-    }).catch(()=>caches.match("./index.html")));
-    return;
-  }
-  event.respondWith(caches.match(event.request).then(c=>c||fetch(event.request)));
+self.addEventListener('fetch', event => {
+  const req = event.request;
+  if (req.method !== 'GET') return;
+  if (new URL(req.url).origin !== location.origin) return;
+  event.respondWith((async () => {
+    try {
+      const fresh = await fetch(req, {cache:'no-store'});
+      const copy = fresh.clone();
+      caches.open(CACHE).then(c => c.put(req, copy)).catch(()=>{});
+      return fresh;
+    } catch (e) {
+      return (await caches.match(req)) || caches.match('./index.html');
+    }
+  })());
 });

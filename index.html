@@ -6,13 +6,13 @@
 <meta name="theme-color" content="#1f6feb">
 <meta name="mobile-web-app-title" content="Habib Naveed CSP">
 <meta name="application-name" content="Habib Naveed CSP">
-
-
+<link rel="manifest" href="manifest.webmanifest?v=20260828.1">
+<link rel="apple-touch-icon" href="icon-192.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Habib Naveed CSP">
-<meta name="app-version" content="2026.08.24.9">
+<meta name="app-version" content="2026.08.28.1">
 <script>
 /*
   APP UPDATE / FRESH LOGIN
@@ -20,7 +20,7 @@
   purani login/session + purana app data clear ho jayega.
   Is se updated app fresh login screen se start hogi.
 */
-const APP_VERSION = "2026.08.24.9";
+const APP_VERSION = "2026.08.28.1";
 (function(){
   try{
     const oldVersion = localStorage.getItem("HNC_APP_VERSION");
@@ -175,11 +175,8 @@ select{background:#fff}
 </style>
 <button id="installAppBtn" onclick="installPWA()">📲 Install App</button>
 
-<link rel="manifest" href="./manifest.webmanifest?v=20260824.9">
-<link rel="apple-touch-icon" href="./icon-192.png?v=20260824.9">
 </head>
 <body>
-
 <div id="loginScreen" class="loginWrap">
   <div class="loginCard">
     <div class="loginLogo">🍰</div>
@@ -230,12 +227,25 @@ select{background:#fff}
     <div><b>👤 <span id="loggedUser"></span></b><div class="muted">📞 0303-9797145</div></div>
     <button class="logout" onclick="logout()">Logout</button>
   </div>
-
-  <div class="card" id="newOrderLauncher">
-    <button class="save" onclick="openNewOrder()">➕ New Order</button>
+  <div class="card dashboardView">
+    <div class="sectionHead"><h2 style="margin:0">💾 Backup & Restore</h2></div>
+    <div class="actions">
+      <button class="pdf" onclick="backupData()">⬇️ Backup Data</button>
+      <button class="pdf" onclick="document.getElementById('restoreFile').click()">⬆️ Restore Data</button>
+      <button class="danger" id="resetAllCompanyBtn" onclick="resetAllCompanyData()">🗑️ Reset All</button>
+    </div>
+    <input id="restoreFile" type="file" accept=".json,application/json" class="hidden" onchange="restoreData(event)">
+    <div class="muted" style="margin-top:8px">Purane mobile se Backup bana kar naye mobile mein Restore karein.</div>
   </div>
 
-  <div class="card">
+  <div class="card dashboardView" id="newOrderLauncher">
+    <button class="save" onclick="openNewOrder()">➕ New Order</button>
+      <button class="save" type="button" onclick="openPaymentVoucher()">💳 New Payment Voucher</button>
+      <button class="pdf" type="button" onclick="openCustomerLedger()">👤 Customer Ledger</button>
+      <button class="pdf" type="button" onclick="openPendingFinalSummary()">⏳ Pending Orders / Final Summary</button>
+  </div>
+
+  <div class="card dashboardView">
     <button class="summaryHeader" onclick="toggleTodaySummary()">📊 Today Summary <span id="summaryDots">•••</span></button>
     <div class="summary">
       <div class="stat">Orders <b id="todayOrders">0</b></div>
@@ -245,6 +255,8 @@ select{background:#fff}
     </div>
     <div class="actions">
       <button class="pdf" onclick="todaySummaryPDF()">📄 Today Summary PDF</button>
+      <button class="pdf" onclick="todayAllPrint()">🖨️ Today All Print</button>
+      <button class="pdf" id="todayAllSavePdfBtn" type="button" onclick="todayAllSavePDF()">📥 Save Today All PDF</button>
       <button class="pdf" onclick="allOrdersPDF()">📄 My Orders PDF</button>
     </div>
 
@@ -254,7 +266,7 @@ select{background:#fff}
     </div>
   </div>
 
-  <div class="card hidden" id="newOrderPanel">
+  <div class="card dashboardView hidden" id="newOrderPanel">
     <div class="sectionHead"><h2>➕ New Order</h2><button class="closePanel" onclick="showDashboard()">✖ Dashboard</button></div>
     <label>Customer</label>
     <input id="customerSearch" list="customerList" placeholder="Search/select previous customer..." oninput="customerSelected()">
@@ -304,7 +316,7 @@ select{background:#fff}
     <button class="save" onclick="saveOrder()">💾 Save Complete Order</button>
   </div>
 
-  <div class="card">
+  <div class="card hidden" id="pendingPanel">
     <div class="sectionHead">
       <h2 style="margin:0">⏳ Pending Orders</h2>
       <span class="pendingBadge" id="pendingCount">0</span>
@@ -312,7 +324,7 @@ select{background:#fff}
     <div id="pendingOrders"></div>
   </div>
 
-  <div class="card">
+  <div class="card hidden" id="finalSummaryPanel">
     <div class="sectionHead">
       <h2 style="margin:0">📄 Final Summary</h2>
       <span class="pendingBadge" id="finalSummaryStatus">Pending Orders</span>
@@ -321,16 +333,74 @@ select{background:#fff}
     <button class="save" id="finalSummaryBtn" onclick="finalSummaryPDF()" disabled>📄 Generate Final Summary PDF</button>
   </div>
 
+  <div class="card hidden" id="paymentVoucherPanel">
+    <div class="sectionHead">
+      <h2 style="margin:0">💳 Payment Voucher</h2>
+    </div>
+
+    <label>Customer</label>
+    <input id="voucherCustomerSearch" list="voucherCustomerList"
+           placeholder="Search customer / mobile..." oninput="voucherCustomerSelected()">
+    <datalist id="voucherCustomerList"></datalist>
+
+    <div class="customerBox">
+      <label>Customer Name</label>
+      <input id="voucherCustomer" placeholder="Customer name">
+
+      <label>Mobile</label>
+      <input id="voucherMobile" type="tel" placeholder="03XXXXXXXXX">
+
+      <label>Address</label>
+      <input id="voucherAddress" placeholder="Customer address">
+    </div>
+
+    <div class="itemgrid">
+      <div>
+        <label>Transaction Type</label>
+        <select id="voucherType">
+          <option value="credit">Credit — Payment Received</option>
+          <option value="debit">Debit — Amount Due/Added</option>
+        </select>
+      </div>
+      <div>
+        <label>Amount</label>
+        <input id="voucherAmount" type="number" min="0" step="0.01" placeholder="Amount">
+      </div>
+    </div>
+
+    <label>Note / Reference</label>
+    <input id="voucherNote" placeholder="Optional note">
+
+    <button class="save" onclick="postPaymentVoucher()">➕ Post Voucher</button>
+    <div id="voucherMsg" class="muted" style="margin-top:8px"></div>
+  </div>
+
+  <div class="card ledgerRelated hidden">
+    <div class="sectionHead">
+      <h2 style="margin:0">📊 Customer Wise Report</h2>
+      <button class="pdf" onclick="renderCustomerLedger()">🔄 Refresh</button>
+    </div>
+    <input class="search" id="reportCustomerSearch" list="reportCustomerList"
+           placeholder="🔎 Search customer / mobile..." oninput="renderCustomerWiseReport()">
+    <datalist id="reportCustomerList"></datalist>
+    <div id="customerWiseReport"></div>
+  </div>
+
   <div id="ledgerPanel" class="card hidden">
-    <div class="sectionHead"><h2>👤 Customer Ledger</h2><button class="closePanel" onclick="togglePanel('ledgerPanel', this)">✖ Close</button></div>
+    <div class="sectionHead">
+      <h2>👤 Customer Ledger</h2>
+      <div class="actions">
+        <button class="pdf" type="button" onclick="customerLedgerPDF()">📄 Ledger PDF</button>
+        <button class="closePanel" onclick="showDashboard()">✖ Dashboard</button>
+      </div>
+    </div>
     <input class="search" id="ledgerSearch" list="ledgerCustomerList"
            placeholder="🔎 Search customer or mobile..." oninput="renderCustomerLedger()">
     <datalist id="ledgerCustomerList"></datalist>
     <div id="customerLedger"></div>
-    </div>
   </div>
 
-  <div class="card">
+  <div class="card dashboardView">
     <h2>📋 My Saved Orders</h2>
     <input class="search" id="search" type="search" placeholder="🔎 Search customer, mobile or product..." oninput="renderOrders()">
     <div id="orders"></div>
@@ -358,6 +428,7 @@ function getUsers(){ return loadUsers(); }
 let currentUser = sessionStorage.getItem("orderBookerUser") || "";
 let items=[];
 let orders=[];
+let payments=[];
 let products=[];
 let productCatalog={};
 
@@ -365,11 +436,13 @@ function userKey(){ return "orderBookerPro_"+currentUser; }
 
 function loadUserData(){
   orders=JSON.parse(localStorage.getItem(userKey())||"[]");
+  payments=JSON.parse(localStorage.getItem(userKey()+"_payments")||"[]");
   try{productCatalog=JSON.parse(localStorage.getItem(userKey()+"_products")||"{}")||{};}
   catch(e){productCatalog={};}
 }
 function saveUserData(){
   localStorage.setItem(userKey(),JSON.stringify(orders));
+  localStorage.setItem(userKey()+"_payments",JSON.stringify(payments));
   localStorage.setItem(userKey()+"_products",JSON.stringify(productCatalog));
 }
 function todayKey(){
@@ -450,10 +523,234 @@ function openApp(){
   renderCustomerList();
   renderProductList();
   renderCustomerLedgerList();
+  renderVoucherCustomerList();
+  renderReportCustomerList();
   renderCustomerLedger();
+  renderCustomerWiseReport();
   updateNewProductTotal();
   updateFinalSummaryButton();
   showDashboard();
+}
+
+
+function getAllCustomerKeys(){
+  const keys=new Set();
+  orders.forEach(o=>{
+    const k=(o.mobile||o.customer||"").trim().toLowerCase();
+    if(k)keys.add(k);
+  });
+  payments.forEach(p=>{
+    const k=(p.mobile||p.customer||"").trim().toLowerCase();
+    if(k)keys.add(k);
+  });
+  return keys;
+}
+
+function getCustomerTransactions(){
+  const groups={};
+
+  function ensure(o){
+    const key=(o.mobile||o.customer||"").trim().toLowerCase();
+    if(!key)return null;
+    if(!groups[key])groups[key]={
+      key,
+      name:o.customer||"",
+      mobile:o.mobile||"",
+      address:o.address||"",
+      transactions:[]
+    };
+    if(o.customer)groups[key].name=o.customer;
+    if(o.mobile)groups[key].mobile=o.mobile;
+    if(o.address)groups[key].address=o.address;
+    return groups[key];
+  }
+
+  orders.forEach(o=>{
+    const g=ensure(o);
+    if(!g)return;
+    g.transactions.push({
+      id:o.id,
+      date:o.date||"",
+      dateKey:o.dateKey||"",
+      ref:o.orderNo||"Order",
+      type:"debit",
+      amount:Number(o.grand)||0,
+      note:"Order Sale"
+    });
+  });
+
+  payments.forEach(p=>{
+    const g=ensure(p);
+    if(!g)return;
+    g.transactions.push({
+      id:p.id,
+      date:p.date||"",
+      dateKey:p.dateKey||"",
+      ref:p.voucherNo||"Voucher",
+      type:p.type==="credit"?"credit":"debit",
+      amount:Number(p.amount)||0,
+      note:p.note||"Payment Voucher"
+    });
+  });
+
+  return groups;
+}
+
+function renderVoucherCustomerList(){
+  const list=document.getElementById("voucherCustomerList");
+  if(!list)return;
+  const customers=Object.values(getCustomerTransactions()).sort((a,b)=>String(a.name).localeCompare(String(b.name)));
+  list.innerHTML=customers.map(c=>
+    `<option value="${esc(c.mobile)}">${esc(c.name)} — ${esc(c.mobile)}</option>`
+  ).join("");
+}
+
+function voucherCustomerSelected(){
+  const q=document.getElementById("voucherCustomerSearch").value.trim().toLowerCase();
+  const c=Object.values(getCustomerTransactions()).find(x=>
+    x.mobile.toLowerCase()===q || x.name.toLowerCase()===q
+  );
+  if(!c)return;
+  document.getElementById("voucherCustomer").value=c.name||"";
+  document.getElementById("voucherMobile").value=c.mobile||"";
+  document.getElementById("voucherAddress").value=c.address||"";
+}
+
+
+function openCustomerLedger(){
+  document.querySelectorAll(".dashboardView,.ledgerRelated").forEach(el=>el.classList.add("hidden"));
+  const voucher=document.getElementById("paymentVoucherPanel");
+  if(voucher)voucher.classList.add("hidden");
+  const panel=document.getElementById("ledgerPanel");
+  if(!panel)return;
+  panel.classList.remove("hidden");
+  renderCustomerLedger();
+  renderCustomerWiseReport();
+  window.scrollTo(0,0);
+  setTimeout(function(){
+    const s=document.getElementById("ledgerSearch");
+    if(s)s.focus();
+  },80);
+}
+
+function openPaymentVoucher(){
+  document.querySelectorAll(".dashboardView,.ledgerRelated").forEach(el=>el.classList.add("hidden"));
+  const ledger=document.getElementById("ledgerPanel");
+  if(ledger)ledger.classList.add("hidden");
+  const panel=document.getElementById("paymentVoucherPanel");
+  if(!panel)return;
+
+  panel.classList.remove("hidden");
+
+  // Clear a fresh voucher and put focus on Customer.
+  document.getElementById("voucherCustomerSearch").value="";
+  document.getElementById("voucherCustomer").value="";
+  document.getElementById("voucherMobile").value="";
+  document.getElementById("voucherAddress").value="";
+  document.getElementById("voucherType").value="credit";
+  document.getElementById("voucherAmount").value="";
+  document.getElementById("voucherNote").value="";
+  document.getElementById("voucherMsg").textContent="";
+
+  setTimeout(function(){
+    document.getElementById("voucherCustomerSearch").focus();
+  },50);
+
+  panel.scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+function postPaymentVoucher(){
+  const customer=document.getElementById("voucherCustomer").value.trim();
+  const mobile=document.getElementById("voucherMobile").value.trim();
+  const address=document.getElementById("voucherAddress").value.trim();
+  const type=document.getElementById("voucherType").value;
+  const amount=Number(document.getElementById("voucherAmount").value);
+  const note=document.getElementById("voucherNote").value.trim();
+
+  if(!customer || !mobile){
+    alert("Customer Name aur Mobile enter karein."); return;
+  }
+  if(!Number.isFinite(amount) || amount<=0){
+    alert("Amount sahi enter karein."); return;
+  }
+
+  const voucher={
+    id:Date.now(),
+    voucherNo:"PV-"+String(Date.now()).slice(-6),
+    bookedBy:currentUser,
+    customer,
+    mobile,
+    address,
+    type:type==="credit"?"credit":"debit",
+    amount,
+    note,
+    date:new Date().toLocaleString("en-PK"),
+    dateKey:todayKey()
+  };
+
+  payments.unshift(voucher);
+  saveUserData();
+
+  document.getElementById("voucherMsg").textContent=
+    `${voucher.voucherNo} posted — ${voucher.type==="credit"?"Credit":"Debit"} Rs. ${money(amount)}`;
+
+  document.getElementById("voucherAmount").value="";
+  document.getElementById("voucherNote").value="";
+
+  renderVoucherCustomerList();
+  renderReportCustomerList();
+  renderCustomerLedgerList();
+  renderCustomerLedger();
+  renderCustomerWiseReport();
+
+  alert("Payment Voucher Post ho gaya ✅\n"+voucher.voucherNo+"\n"+voucher.type.toUpperCase()+" Rs. "+money(amount));
+}
+
+function renderReportCustomerList(){
+  const list=document.getElementById("reportCustomerList");
+  if(!list)return;
+  const customers=Object.values(getCustomerTransactions()).sort((a,b)=>String(a.name).localeCompare(String(b.name)));
+  list.innerHTML=customers.map(c=>
+    `<option value="${esc(c.mobile)}">${esc(c.name)} — ${esc(c.mobile)}</option>`
+  ).join("");
+}
+
+function renderCustomerWiseReport(){
+  const box=document.getElementById("customerWiseReport");
+  const q=(document.getElementById("reportCustomerSearch")?.value||"").trim().toLowerCase();
+  if(!box)return;
+
+  let groups=Object.values(getCustomerTransactions());
+  if(q){
+    groups=groups.filter(c=>
+      String(c.name||"").toLowerCase().includes(q) ||
+      String(c.mobile||"").toLowerCase().includes(q)
+    );
+  }
+
+  groups.sort((a,b)=>String(a.name).localeCompare(String(b.name)));
+
+  if(!groups.length){
+    box.innerHTML='<div class="empty">Customer ka record nahi mila.</div>';
+    return;
+  }
+
+  box.innerHTML=groups.map(c=>{
+    const debit=c.transactions.filter(x=>x.type==="debit").reduce((s,x)=>s+x.amount,0);
+    const credit=c.transactions.filter(x=>x.type==="credit").reduce((s,x)=>s+x.amount,0);
+    const balance=debit-credit;
+
+    return `<div class="ledgerCustomer">
+      <div class="ledgerName">${esc(c.name)}</div>
+      <div class="muted">📱 ${esc(c.mobile)}${c.address?` • 📍 ${esc(c.address)}`:""}</div>
+      <div class="ledgerSummary">
+        <div class="ledgerStat">Debit <b>Rs. ${money(debit)}</b></div>
+        <div class="ledgerStat">Credit <b>Rs. ${money(credit)}</b></div>
+        <div class="ledgerStat">Balance <b>Rs. ${money(balance)}</b></div>
+        <div class="ledgerStat">Entries <b>${c.transactions.length}</b></div>
+      </div>
+    </div>`;
+  }).join("");
 }
 
 function getCustomers(){
@@ -560,7 +857,12 @@ function newCustomer(){
 
 
 function showDashboard(){
-  document.getElementById("newOrderPanel")?.classList.add("hidden");
+  document.querySelectorAll(".dashboardView").forEach(el=>el.classList.remove("hidden"));
+  document.querySelectorAll(".ledgerRelated").forEach(el=>el.classList.add("hidden"));
+  ["ledgerPanel","paymentVoucherPanel","pendingPanel","finalSummaryPanel","newOrderPanel"].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.classList.add("hidden");
+  });
   document.getElementById("newOrderLauncher")?.classList.remove("hidden");
   window.scrollTo(0,0);
 }
@@ -724,6 +1026,9 @@ function saveOrder(){
   renderOrders();
   updateSummary();
   renderCustomerList();
+  renderVoucherCustomerList();
+  renderReportCustomerList();
+  renderCustomerLedgerList();
   renderProductList();
   renderCategoryList();
   renderCategorySelect();
@@ -773,7 +1078,7 @@ function completeOrder(id){
 function deleteOrder(id){
   if(!confirm("Delete this complete order?"))return;
   orders=orders.filter(o=>o.id!==id);
-  saveUserData();renderOrders();renderPendingOrders();updateSummary();renderCustomerList();renderProductList();renderCustomerLedgerList();renderCustomerLedger();updateFinalSummaryButton();
+  saveUserData();renderOrders();renderPendingOrders();updateSummary();renderCustomerList();renderVoucherCustomerList();renderReportCustomerList();renderCustomerLedgerList();renderCustomerLedger();renderCustomerWiseReport();renderProductList();updateFinalSummaryButton();
 }
 
 function renderCustomerLedgerList(){
@@ -787,47 +1092,127 @@ function renderCustomerLedger(){
   const q=(document.getElementById("ledgerSearch")?.value||"").trim().toLowerCase();
   if(!box)return;
 
-  const groups={};
-  orders.forEach(o=>{
-    const key=(o.mobile||o.customer||"").trim().toLowerCase();
-    if(!key)return;
-    if(q && !(String(o.customer||"").toLowerCase().includes(q) || String(o.mobile||"").toLowerCase().includes(q))) return;
-    if(!groups[key]) groups[key]={name:o.customer||"",mobile:o.mobile||"",orders:[],total:0,completed:0,pending:0};
-    groups[key].orders.push(o);
-    groups[key].total += Number(o.grand)||0;
-    if((o.status||"pending")==="completed") groups[key].completed++;
-    else groups[key].pending++;
-  });
+  const groups=getCustomerTransactions();
+  let customers=Object.values(groups);
+  if(q){
+    customers=customers.filter(c=>
+      String(c.name||"").toLowerCase().includes(q) ||
+      String(c.mobile||"").toLowerCase().includes(q)
+    );
+  }
 
-  const customers=Object.values(groups).sort((a,b)=>String(a.name).localeCompare(String(b.name)));
+  customers.sort((a,b)=>String(a.name).localeCompare(String(b.name)));
+
   if(!customers.length){
     box.innerHTML='<div class="empty">Customer ka record nahi mila.</div>';
     return;
   }
 
   box.innerHTML=customers.map(c=>{
-    const rows=c.orders.sort((a,b)=>b.id-a.id).map(o=>`
+    const tx=c.transactions.sort((a,b)=>(b.id||0)-(a.id||0));
+    let debit=0,credit=0;
+    tx.forEach(x=>x.type==="debit"?debit+=x.amount:credit+=x.amount);
+    const balance=debit-credit;
+
+    const rows=tx.map(x=>`
       <tr>
-        <td>${esc(o.orderNo)}</td>
-        <td>${esc(o.dateKey||"")}</td>
-        <td>${(o.status||"pending")==="completed"?"✅ Completed":"⏳ Pending"}</td>
-        <td>Rs. ${money(o.grand)}</td>
+        <td>${esc(x.ref)}</td>
+        <td>${esc(x.dateKey||"")}</td>
+        <td>${esc(x.note||"")}</td>
+        <td>${x.type==="debit"?"Rs. "+money(x.amount):"—"}</td>
+        <td>${x.type==="credit"?"Rs. "+money(x.amount):"—"}</td>
+        <td>${x.type==="debit"?"Debit":"Credit"}</td>
       </tr>`).join("");
+
     return `<div class="ledgerCustomer">
       <div class="ledgerName">${esc(c.name)}</div>
-      <div class="muted">📱 ${esc(c.mobile)}</div>
+      <div class="muted">📱 ${esc(c.mobile)}${c.address?` • 📍 ${esc(c.address)}`:""}</div>
       <div class="ledgerSummary">
-        <div class="ledgerStat">Total Orders <b>${c.orders.length}</b></div>
-        <div class="ledgerStat">Completed <b>${c.completed}</b></div>
-        <div class="ledgerStat">Pending <b>${c.pending}</b></div>
-        <div class="ledgerStat">Total Sales <b>Rs. ${money(c.total)}</b></div>
+        <div class="ledgerStat">Debit <b>Rs. ${money(debit)}</b></div>
+        <div class="ledgerStat">Credit <b>Rs. ${money(credit)}</b></div>
+        <div class="ledgerStat">Balance <b>Rs. ${money(balance)}</b></div>
+        <div class="ledgerStat">Entries <b>${tx.length}</b></div>
       </div>
-      <table class="ledgerTable">
-        <tr><th>Order</th><th>Date</th><th>Status</th><th>Amount</th></tr>
-        ${rows}
-      </table>
+      <div style="overflow:auto">
+        <table class="ledgerTable">
+          <tr><th>Ref</th><th>Date</th><th>Details</th><th>Debit</th><th>Credit</th><th>Type</th></tr>
+          ${rows}
+        </table>
+      </div>
     </div>`;
   }).join("");
+}
+
+
+function customerLedgerPDF(){
+  const q=(document.getElementById("ledgerSearch")?.value||"").trim().toLowerCase();
+  const groups=getCustomerTransactions();
+  let customers=Object.values(groups);
+
+  if(q){
+    customers=customers.filter(c=>
+      String(c.name||"").toLowerCase().includes(q) ||
+      String(c.mobile||"").toLowerCase().includes(q)
+    );
+  }
+
+  customers.sort((a,b)=>String(a.name).localeCompare(String(b.name)));
+
+  if(!customers.length){
+    alert("Customer Ledger mein koi record nahi hai.");
+    return;
+  }
+
+  const pages=customers.map((c,index)=>{
+    const tx=[...c.transactions].sort((a,b)=>(a.id||0)-(b.id||0));
+    let debit=0,credit=0;
+    tx.forEach(x=>x.type==="debit"?debit+=x.amount:credit+=x.amount);
+    const balance=debit-credit;
+
+    const rows=tx.map(x=>`<tr>
+      <td>${esc(x.dateKey||"")}</td>
+      <td>${esc(x.ref||"")}</td>
+      <td>${esc(x.note||"")}</td>
+      <td class="right">${x.type==="debit"?money(x.amount):""}</td>
+      <td class="right">${x.type==="credit"?money(x.amount):""}</td>
+    </tr>`).join("");
+
+    return `<div class="ledgerReceipt ${index<customers.length-1?'pageBreak':''}">
+      <div class="receiptHeader">
+        <div class="receiptTitle">حبیب نوید کنفیکشنری ٹریڈرز</div>
+        <div class="receiptSub">Habib Naveed Confectionery CSP</div>
+        <div class="receiptPhones">0303-9797145 &nbsp;•&nbsp; 0309-3609377</div>
+        <div class="invoiceTitle">CUSTOMER LEDGER</div>
+      </div>
+
+      <div class="invoiceInfo">
+        <div><b>Customer:</b> ${esc(c.name||"")}</div>
+        <div><b>Mobile:</b> ${esc(c.mobile||"")}</div>
+        ${c.address?`<div><b>Address:</b> ${esc(c.address)}</div>`:""}
+        <div><b>Report Date:</b> ${esc(new Date().toLocaleDateString("en-PK"))}</div>
+      </div>
+
+      <table class="receiptTable">
+        <tr>
+          <th>Date</th><th>Ref</th><th>Details</th><th>Debit</th><th>Credit</th>
+        </tr>
+        ${rows}
+      </table>
+
+      <div class="receiptTotals">
+        <div><span>Total Debit</span><b>Rs. ${money(debit)}</b></div>
+        <div><span>Total Credit</span><b>Rs. ${money(credit)}</b></div>
+        <div class="grandReceipt"><span>Balance</span><b>Rs. ${money(balance)}</b></div>
+      </div>
+
+      <div class="receiptFooter">
+        <div>Customer Wise Ledger</div>
+        <div>Design by Rashid Javed • 0314-6775046</div>
+      </div>
+    </div>`;
+  }).join("");
+
+  printPDF("Customer Ledger",pages);
 }
 
 function renderOrders(){
@@ -1069,11 +1454,45 @@ function printPDF(title,body){
   if(!w){alert("Popup blocked. Please allow popups for this file.");return}
   w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${esc(title)}</title>
   <style>
-  body{font-family:Calibri,"Segoe UI",Arial,sans-serif;margin:30px;color:#111}h1{text-align:center;margin-bottom:5px}
-  h2{margin-top:25px}table{width:100%;border-collapse:collapse;margin-top:12px}
-  th,td{border:1px solid #bbb;padding:8px;text-align:left}th{background:#eee}
-  .right{text-align:right}.total{font-size:20px;font-weight:bold;text-align:right;margin-top:15px}
-  .meta{margin:4px 0;color:#444}@media print{button{display:none}}
+  /* Exact invoice/PDF paper: 3.2 x 8.4 inches = 81.28 x 213.36 mm */
+  @page{size:81.28mm 213.36mm;margin:0}
+  html,body{width:81.28mm;height:213.36mm;min-height:213.36mm;margin:0;padding:0}
+  body{font-family:Calibri,"Segoe UI",Arial,sans-serif;width:81.28mm;height:213.36mm;min-height:213.36mm;margin:0;padding:3.05mm;color:#111;font-size:10px;overflow:hidden}
+  h1{font-size:14px;text-align:center;margin:0 0 3px}
+  h2{font-size:12px;margin:5px 0}
+  table{width:100%;border-collapse:collapse;margin-top:5px;font-size:9px}
+  th,td{border-bottom:1px solid #777;padding:3px 1px;text-align:left}th{border-top:1px solid #777}
+  .right{text-align:right}.total{font-size:13px;font-weight:bold;text-align:right;margin-top:7px}
+  .meta{margin:2px 0;color:#222;font-size:9px}
+  .printNow{width:100%;background:#1f6feb;color:#fff;border:0;border-radius:6px;padding:7px;margin-bottom:8px;font-weight:bold}
+  @media print{button{display:none!important}html,body{width:81.28mm!important;height:213.36mm!important;min-height:213.36mm!important;margin:0!important;padding:0!important}body{padding:3.05mm!important;overflow:hidden!important}}
+  .pageBreak{page-break-after:always;break-after:page;break-inside:avoid;}
+  .ledgerCustomer{border:1px solid #bbb;border-radius:8px;padding:10px;margin-top:10px}
+  .ledgerName{font-size:15px;font-weight:bold}
+  .ledgerSummary{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin:8px 0}
+  .ledgerStat{background:#f4f4f4;border-radius:6px;padding:7px;font-size:11px}
+  .ledgerStat b{display:block;margin-top:2px}
+  .ledgerTable{width:100%;border-collapse:collapse;font-size:9px}
+  .ledgerTable th,.ledgerTable td{border:1px solid #bbb;padding:4px}
+  .ledgerTable th{background:#eee}
+  .ledgerReceipt{width:100%;min-height:8.05in}
+  .ledgerReceipt .receiptTable th,.ledgerReceipt .receiptTable td{font-size:8.5px;padding:3px 2px}
+  .ledgerReceipt .receiptTable th{white-space:nowrap}
+  .receipt{width:100%;min-height:8.05in}
+  .receiptHeader{text-align:center;border-bottom:2px solid #111;padding-bottom:6px;margin-bottom:7px}
+  .receiptTitle{font-size:17px;font-weight:bold;line-height:1.2}
+  .receiptSub{font-size:10px;font-weight:bold;margin-top:2px}
+  .receiptPhones{font-size:10px;font-weight:bold;margin-top:4px}
+  .invoiceTitle{font-size:15px;font-weight:bold;margin-top:5px}
+  .invoiceInfo{font-size:10px;line-height:1.55;border-bottom:1px solid #777;padding-bottom:5px;margin-bottom:5px}
+  .receiptTable{margin-top:4px}
+  .receiptTable th,.receiptTable td{border:1px solid #777;padding:4px 3px;font-size:9px}
+  .receiptTable th{font-weight:bold}
+  .receiptTable .desc{width:48%;word-break:break-word}
+  .receiptTotals{margin-top:7px;border-top:1px solid #111;padding-top:5px;font-size:10px}
+  .receiptTotals>div{display:flex;justify-content:space-between;padding:2px 0}
+  .grandReceipt{font-size:14px;border-top:2px solid #111;margin-top:3px;padding-top:4px}
+  .receiptFooter{text-align:center;font-size:9px;margin-top:14px;border-top:1px dashed #777;padding-top:7px;line-height:1.6}
   </style>
 <style>
 #installAppBtn{
@@ -1085,8 +1504,8 @@ function printPDF(title,body){
 </style>
 <button id="installAppBtn" onclick="installPWA()">📲 Install App</button>
 
-</head><body>${body}
-  <script>window.onload=function(){setTimeout(function(){window.print()},300)}<\/script>
+</head><body><button class="printNow" onclick="window.print()">🖨️ Print</button>${body}
+  <script>window.onload=function(){window.focus()}<\/script>
 <div id="summaryListOverlay" class="summaryListOverlay hidden">
   <div class="summaryListTop">
     <h2 id="summaryListTitle">Details</h2>
@@ -1095,51 +1514,168 @@ function printPDF(title,body){
   <div id="summaryListContent"></div>
 </div>
 
-function focusCustomerNameField(){
-  setTimeout(()=>{
-    const el=document.getElementById("customerName") ||
-              document.getElementById("orderCustomer") ||
-              document.querySelector('input[name="customerName"]');
-    if(el){ el.focus(); el.select?.(); }
-  },120);
-}
 
-
-function forwardSavedOrderSMS(order){
-  try{
-    const target="03093609377";
-    const no=order.orderNo || order.number || order.id || "";
-    const customer=order.customerName || order.customer || order.name || "";
-    const items=Array.isArray(order.items) ? order.items : [];
-    const lines=[`Customer: ${customer}`,`Order: ${no}`];
-    items.forEach(x=>{
-      const product=x.product || x.name || "";
-      const qty=x.qty ?? x.quantity ?? "";
-      const rate=x.rate ?? "";
-      lines.push(`Product: ${product} | Qty: ${qty} | Rate: Rs. ${rate}`);
-    });
-    const amount=Number(order.total ?? order.amount ?? order.grandTotal ?? 0);
-    lines.push(`Total: Rs. ${amount}`);
-    window.location.href=`sms:${target}?body=${encodeURIComponent(lines.join("\\n"))}`;
-  }catch(e){ alert("SMS open nahi ho saka."); }
-}
 
 </body></html>`);
   w.document.close();
 }
 function singleOrderPDF(id){
   const o=orders.find(x=>x.id===id);if(!o)return;
-  let rows=o.items.map(x=>`<tr><td>${esc(x.category||"")}</td><td>${esc(x.product)}</td><td>${x.qty}</td><td class="right">Rs. ${money(x.rate)}</td><td class="right">Rs. ${money(x.total)}</td></tr>`).join("");
-  const body=`<h1>HABIB NAVEED CONFECTIONERY CSP</h1><h2>Order Invoice</h2>
-  <div class="meta"><b>Booked By:</b> ${esc(o.bookedBy||currentUser)}</div>
-  <div class="meta"><b>Order No:</b> ${esc(o.orderNo)}</div>
-  <div class="meta"><b>Customer:</b> ${esc(o.customer)}</div>
-  <div class="meta"><b>Mobile:</b> ${esc(o.mobile)}</div>
-  <div class="meta"><b>Date:</b> ${esc(o.date)}</div>
-  <table><tr><th>Category</th><th>Product</th><th>Qty</th><th>Rate</th><th>Total</th></tr>${rows}</table>
-  <div class="total">Grand Total: Rs. ${money(o.grand)}</div><div class="meta" style="text-align:center;margin-top:24px">Design by Rashid Javed • 0314-6775046</div>`;
+
+  const rows=o.items.map(x=>`<tr>
+    <td class="desc">${esc(x.product)}</td>
+    <td>${x.qty}</td>
+    <td class="right">${money(x.rate)}</td>
+    <td class="right">${money(x.total)}</td>
+  </tr>`).join("");
+
+  const body=`<div class="receipt">
+    <div class="receiptHeader">
+      <div class="receiptTitle">حبیب نوید کنفیکشنری ٹریڈرز</div>
+      <div class="receiptSub">Habib Naveed Confectionery CSP</div>
+      <div class="receiptPhones">0303-9797145 &nbsp;•&nbsp; 0309-3609377</div>
+      <div class="invoiceTitle">SALE INVOICE</div>
+    </div>
+
+    <div class="invoiceInfo">
+      <div><b>Invoice No:</b> ${esc(o.orderNo)}</div>
+      <div><b>Date:</b> ${esc(o.date)}</div>
+      <div><b>Customer:</b> ${esc(o.customer)}</div>
+      <div><b>Mobile:</b> ${esc(o.mobile)}</div>
+      ${o.address?`<div><b>Address:</b> ${esc(o.address)}</div>`:""}
+    </div>
+
+    <table class="receiptTable">
+      <tr>
+        <th class="desc">Detail</th>
+        <th>Qty</th>
+        <th>Rate</th>
+        <th>Amount</th>
+      </tr>
+      ${rows}
+    </table>
+
+    <div class="receiptTotals">
+      <div><span>Total Items</span><b>${o.items.reduce((s,x)=>s+Number(x.qty||0),0)}</b></div>
+      <div class="grandReceipt"><span>Grand Total</span><b>Rs. ${money(o.grand)}</b></div>
+    </div>
+
+    <div class="receiptFooter">
+      <div>Thank you for your business</div>
+      <div>Design by Rashid Javed • 0314-6775046</div>
+    </div>
+  </div>`;
+
   printPDF("Order "+o.orderNo,body);
 }
+
+
+
+
+function todayAllSavePDF(){
+  const today=getTodayOrders();
+  if(!today.length){
+    alert("Aaj koi order nahi hai.");
+    return;
+  }
+
+  const pages=today.map((o,index)=>{
+    const rows=o.items.map(x=>`<tr>
+      <td class="desc">${esc(x.product)}</td>
+      <td>${x.qty}</td>
+      <td class="right">${money(x.rate)}</td>
+      <td class="right">${money(x.total)}</td>
+    </tr>`).join("");
+
+    return `<div class="receipt ${index<today.length-1?'pageBreak':''}">
+      <div class="receiptHeader">
+        <div class="receiptTitle">حبیب نوید کنفیکشنری ٹریڈرز</div>
+        <div class="receiptSub">Habib Naveed Confectionery CSP</div>
+        <div class="receiptPhones">0303-9797145 &nbsp;•&nbsp; 0309-3609377</div>
+        <div class="invoiceTitle">SALE INVOICE</div>
+      </div>
+      <div class="invoiceInfo">
+        <div><b>Invoice No:</b> ${esc(o.orderNo)}</div>
+        <div><b>Date:</b> ${esc(o.date)}</div>
+        <div><b>Customer:</b> ${esc(o.customer)}</div>
+        <div><b>Mobile:</b> ${esc(o.mobile)}</div>
+        ${o.address?`<div><b>Address:</b> ${esc(o.address)}</div>`:""}
+      </div>
+      <table class="receiptTable">
+        <tr><th class="desc">Detail</th><th>Qty</th><th>Rate</th><th>Amount</th></tr>
+        ${rows}
+      </table>
+      <div class="receiptTotals">
+        <div><span>Total Items</span><b>${o.items.reduce((s,x)=>s+Number(x.qty||0),0)}</b></div>
+        <div class="grandReceipt"><span>Grand Total</span><b>Rs. ${money(o.grand)}</b></div>
+      </div>
+      <div class="receiptFooter">
+        <div>Thank you for your business</div>
+        <div>Design by Rashid Javed • 0314-6775046</div>
+      </div>
+    </div>`;
+  }).join("");
+
+  // Existing printPDF() is used so the established 3.2 × 8.4 inch print CSS is retained.
+  printPDF("Today All Print",pages);
+}
+
+function todayAllPrint(){
+  const a=getTodayOrders();
+  if(!a.length){
+    alert("Aaj koi order nahi hai.");
+    return;
+  }
+
+  const pages=a.map((o,index)=>{
+    const rows=o.items.map(x=>`<tr>
+      <td class="desc">${esc(x.product)}</td>
+      <td>${x.qty}</td>
+      <td class="right">${money(x.rate)}</td>
+      <td class="right">${money(x.total)}</td>
+    </tr>`).join("");
+
+    return `<div class="receipt ${index<a.length-1?'pageBreak':''}">
+      <div class="receiptHeader">
+        <div class="receiptTitle">حبیب نوید کنفیکشنری ٹریڈرز</div>
+        <div class="receiptSub">Habib Naveed Confectionery CSP</div>
+        <div class="receiptPhones">0303-9797145 &nbsp;•&nbsp; 0309-3609377</div>
+        <div class="invoiceTitle">SALE INVOICE</div>
+      </div>
+
+      <div class="invoiceInfo">
+        <div><b>Invoice No:</b> ${esc(o.orderNo)}</div>
+        <div><b>Date:</b> ${esc(o.date)}</div>
+        <div><b>Customer:</b> ${esc(o.customer)}</div>
+        <div><b>Mobile:</b> ${esc(o.mobile)}</div>
+        ${o.address?`<div><b>Address:</b> ${esc(o.address)}</div>`:""}
+      </div>
+
+      <table class="receiptTable">
+        <tr>
+          <th class="desc">Detail</th>
+          <th>Qty</th>
+          <th>Rate</th>
+          <th>Amount</th>
+        </tr>
+        ${rows}
+      </table>
+
+      <div class="receiptTotals">
+        <div><span>Total Items</span><b>${o.items.reduce((s,x)=>s+Number(x.qty||0),0)}</b></div>
+        <div class="grandReceipt"><span>Grand Total</span><b>Rs. ${money(o.grand)}</b></div>
+      </div>
+
+      <div class="receiptFooter">
+        <div>Thank you for your business</div>
+        <div>Design by Rashid Javed • 0314-6775046</div>
+      </div>
+    </div>`;
+  }).join("");
+
+  printPDF("Today All Orders",pages);
+}
+
 function todaySummaryPDF(){
   const a=getTodayOrders();
   const items=a.reduce((s,o)=>s+o.items.reduce((x,i)=>x+i.qty,0),0);
@@ -1170,6 +1706,119 @@ function allOrdersPDF(){
   <table><tr><th>Order No</th><th>Date</th><th>Customer</th><th>Mobile</th><th>Items</th><th>Amount</th></tr>${rows}</table>
   <div class="total">Total Sales: Rs. ${money(sales)}</div><div class="meta" style="text-align:center;margin-top:24px">Design by Rashid Javed • 0314-6775046</div>`;
   printPDF("My Orders Report",body);
+}
+
+
+
+
+function openPendingFinalSummary(){
+  document.querySelectorAll(".dashboardView,.ledgerRelated").forEach(el=>el.classList.add("hidden"));
+  const ledger=document.getElementById("ledgerPanel");
+  if(ledger)ledger.classList.add("hidden");
+  const voucher=document.getElementById("paymentVoucherPanel");
+  if(voucher)voucher.classList.add("hidden");
+  const pending=document.getElementById("pendingPanel");
+  const summary=document.getElementById("finalSummaryPanel");
+  if(pending)pending.classList.remove("hidden");
+  if(summary)summary.classList.remove("hidden");
+  renderPendingOrders();
+  updateFinalSummaryButton();
+  window.scrollTo(0,0);
+}
+
+function closePendingFinalSummary(){
+  showDashboard();
+}
+
+function resetAllCompanyData(){
+  const RESET_PASSWORD = "674750";
+
+  const password=prompt(
+    "Reset All Company Data\n\n" +
+    "Reset password enter karein:"
+  );
+
+  if(password===null)return;
+
+  if(password !== RESET_PASSWORD){
+    alert("Password ghalat hai. ❌\nCompany data delete nahi hua.");
+    return;
+  }
+
+  const ok=confirm(
+    "WARNING!\n\n" +
+    "Company ka tamam business record delete ho jayega:\n" +
+    "Orders, Customers, Products, Ledger, Payment Vouchers aur Reports.\n\n" +
+    "Login / User accounts delete NAHI honge.\n\n" +
+    "Kya aap waqai Reset All karna chahte hain?"
+  );
+
+  if(!ok)return;
+
+  Object.keys(localStorage).forEach(key=>{
+    if(key.startsWith("orderBookerPro_")){
+      localStorage.removeItem(key);
+    }
+  });
+
+  orders=[];
+  payments=[];
+  products=[];
+  productCatalog={};
+  items=[];
+
+  alert(
+    "Reset All complete ✅\n\n" +
+    "Company ka business record zero ho gaya hai.\n" +
+    "Login accounts safe hain."
+  );
+
+  location.reload();
+}
+
+
+function backupData(){
+  try{
+    const data={backupVersion:1,app:"Habib Naveed Confectionery CSP",createdAt:new Date().toISOString(),users:getUsers(),userData:{}};
+    Object.keys(localStorage).forEach(key=>{
+      if(key.startsWith("orderBookerPro_") || key.startsWith("orderBookerUsers_")){
+        data.userData[key]=localStorage.getItem(key);
+      }
+    });
+    const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");
+    a.href=url;
+    a.download="HNC_Backup_"+todayKey()+".json";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    alert("Backup file save ho gayi hai ✅");
+  }catch(e){alert("Backup nahi ban saki: "+e.message);}
+}
+
+function restoreData(event){
+  const file=event.target.files?.[0];
+  if(!file)return;
+  if(!confirm("Restore karne se is device ka HNC data replace ho jayega. Continue?")){
+    event.target.value=""; return;
+  }
+  const reader=new FileReader();
+  reader.onload=function(){
+    try{
+      const data=JSON.parse(reader.result);
+      if(!data || data.app!=="Habib Naveed Confectionery CSP" || !data.userData){
+        throw new Error("Invalid HNC backup file.");
+      }
+      Object.entries(data.userData).forEach(([key,value])=>localStorage.setItem(key,value));
+      if(data.users)localStorage.setItem(USERS_KEY,JSON.stringify(data.users));
+      alert("Restore complete ✅\nApp reload ho rahi hai.");
+      location.reload();
+    }catch(e){alert("Restore failed: "+e.message);}
+    finally{event.target.value="";}
+  };
+  reader.readAsText(file);
 }
 
 if(currentUser && getUsers()[currentUser]){
@@ -1219,7 +1868,7 @@ function checkAppUpdate(){
 checkAppUpdate();
 
 if("serviceWorker" in navigator){
-  window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js?v=20260824.9", {updateViaCache:"none"});
+  window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
 }
 </script>
 </body>
